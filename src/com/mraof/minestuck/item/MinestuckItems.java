@@ -157,7 +157,7 @@ public class MinestuckItems
 	public static Item rawCruxite = new Item().setUnlocalizedName("rawCruxite").setCreativeTab(TabMinestuck.instance);
 	public static Item rawUranium = new Item().setUnlocalizedName("rawUranium").setCreativeTab(TabMinestuck.instance);
 	public static Item energyCore = new Item().setUnlocalizedName("energyCore").setCreativeTab(TabMinestuck.instance);
-	//public static Item chessboard = new Item().setUnlocalizedName("chessboard").setCreativeTab(TabMinestuck.instance);
+	public static Item itemReturnNode = new ItemReturnNode();
 	public static ItemDowel cruxiteDowel = new ItemDowel(MinestuckBlocks.blockCruxiteDowel);
 	public static Item captchaCard = new ItemCaptchaCard();
 	public static Item cruxiteApple = new ItemCruxiteApple();
@@ -455,7 +455,7 @@ public class MinestuckItems
 		registry.register(cruxiteApple.setRegistryName("cruxite_apple"));
 		registry.register(cruxitePotion.setRegistryName("cruxite_potion"));
 		registry.register(disk.setRegistryName("computer_disk"));
-		//registry.register(chessboard.setRegistryName("chessboard"));
+		registry.register(itemReturnNode.setRegistryName("return_node"));
 		registry.register(minestuckBucket.setRegistryName("minestuck_bucket"));
 		registry.register(obsidianBucket.setRegistryName("bucket_obsidian"));
 		registry.register(modusCard.setRegistryName("modus_card"));

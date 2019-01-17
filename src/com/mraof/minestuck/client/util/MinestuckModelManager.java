@@ -219,7 +219,6 @@ public class MinestuckModelManager
 		register(threshDvd);
 		register(crewPoster);
 		register(sbahjPoster);
-		//TODO
 		register(shopPoster, 0, "shop_poster_1");
 		register(carvingTool);
 		register(crumplyHat);
@@ -232,6 +231,7 @@ public class MinestuckModelManager
 		register(glowystoneDust);
 		register(fakeArms);
 		register(captcharoidCamera);
+		register(itemReturnNode);
 
 		for(EnumShopPoster type : EnumShopPoster.values())
 			register(shopPoster, type.ordinal(), "shop_poster"+type.ordinal());
