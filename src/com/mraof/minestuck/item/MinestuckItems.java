@@ -244,13 +244,9 @@ public class MinestuckItems
 				return block.getUnlocalizedName();
 			}
 		});
-<<<<<<< HEAD
-
-=======
 		
 		registerItemBlock(registry, new ItemBlock(templePlacer));
 		
->>>>>>> parent of 52215b7e... Moving some stuff to another branch
 		registerItemBlock(registry, new ItemBlock(coalOreNetherrack));
 		registerItemBlock(registry, new ItemBlock(ironOreEndStone));
 		registerItemBlock(registry, new ItemBlock(ironOreSandstone));

@@ -109,7 +109,6 @@ public class MinestuckBlocks
 	public static Block endPlanks = new BlockCustom(Material.WOOD, MapColor.SAND, SoundType.WOOD).setFireInfo(1, 250).setUnlocalizedName("endPlanks").setHardness(1.0F).setCreativeTab(TabMinestuck.instance);
 	public static Block endSapling = new BlockEndSapling();
 	public static Block endGrass = new BlockEndGrass();
-<<<<<<< HEAD
 	public static Block coarseEndStone = new BlockCustomStone(MapColor.SAND).setHardness(3.0F).setUnlocalizedName("coarseEndStone").setCreativeTab(TabMinestuck.instance);
 
 	public static Block floweryMossStone = new BlockCustomStone(MapColor.GRAY).setUnlocalizedName("floweryMossStone").setCreativeTab(TabMinestuck.instance);
@@ -131,13 +130,10 @@ public class MinestuckBlocks
 	public static Block pinkStonePolish = new BlockCustomStone(MapColor.PINK).setUnlocalizedName("pinkStonePolish")	.setCreativeTab(TabMinestuck.instance);
 	public static Block denseCloud = new BlockDenseCloud();
 
-=======
-	public static Block coarseEndStone = new BlockEndStoneCoarse();
 	
 	//Structure Generators
 	public static Block templePlacer = new BlockTemplePlacer();
 	
->>>>>>> parent of 52215b7e... Moving some stuff to another branch
 	//Ores
 	public static Block oreCruxite = new BlockCruxiteOre();
 	public static BlockUraniumOre oreUranium = (BlockUraniumOre) new BlockUraniumOre().setUnlocalizedName("oreUranium");
@@ -380,7 +376,7 @@ public class MinestuckBlocks
 		registry.register(blockLightWater.setRegistryName("block_light_water"));
 
 		registry.register(rabbitSpawner.setRegistryName("rabbit_spawner"));
-<<<<<<< HEAD
+
 
 		for(EnumSlabStairMaterial material : EnumSlabStairMaterial.values())
 		{
@@ -388,11 +384,8 @@ public class MinestuckBlocks
 			registry.register(material.getSlabFull().setRegistryName(material.getName() + "_slab_full"));
 			registry.register(material.getStair().setRegistryName(material.getName() + "_stairs"));
 		}
-
-=======
 		registry.register(templePlacer.setRegistryName("templePlacer"));
 		
->>>>>>> parent of 52215b7e... Moving some stuff to another branch
 		//fluids
 		/*liquidGrists = new Block[GristType.allGrists];
 		gristFluids = new Fluid[GristType.allGrists];
