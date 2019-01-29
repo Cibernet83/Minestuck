@@ -386,6 +386,7 @@ public class MinestuckModelManager
 
 		register(uraniumCooker);
 
+<<<<<<< HEAD
 		for(EnumSlabStairMaterial mat : EnumSlabStairMaterial.values())
 		{
 			register(mat.getStair());
@@ -394,6 +395,10 @@ public class MinestuckModelManager
 			ModelLoader.setCustomStateMapper(mat.getSlabFull(), (new StateMap.Builder()).ignore(BlockSlab.HALF, BlockMinestuckSlab.dummy).build());
 		}
 
+=======
+		register(templePlacer);
+		
+>>>>>>> parent of 52215b7e... Moving some stuff to another branch
 		ModelLoader.setCustomStateMapper(blockOil, (new StateMap.Builder()).ignore(BlockFluidBase.LEVEL).build());
 		ModelLoader.setCustomStateMapper(blockBlood, (new StateMap.Builder()).ignore(BlockFluidBase.LEVEL).build());
 		ModelLoader.setCustomStateMapper(blockBrainJuice, (new StateMap.Builder()).ignore(BlockFluidBase.LEVEL).build());
