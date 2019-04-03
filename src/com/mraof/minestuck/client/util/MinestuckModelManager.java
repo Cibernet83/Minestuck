@@ -241,10 +241,10 @@ public class MinestuckModelManager
 		register(glowystoneDust);
 		register(fakeArms);
 		register(captcharoidCamera);
-		/*
+		
 		for(EnumShopPoster type : EnumShopPoster.values())
 			register(shopPoster, type.ordinal(), "shop_poster"+type.ordinal());
-		*/
+		
 	}
 	
 	private static void blockModels()

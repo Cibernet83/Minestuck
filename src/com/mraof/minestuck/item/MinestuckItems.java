@@ -519,7 +519,7 @@ public class MinestuckItems
 		registry.register(threshDvd.setRegistryName("thresh_dvd"));
 		registry.register(crewPoster.setRegistryName("crew_poster"));
 		registry.register(sbahjPoster.setRegistryName("sbahj_poster"));
-		//registry.register(shopPoster.setRegistryName("shop_poster"));
+		registry.register(shopPoster.setRegistryName("shop_poster"));
 		registry.register(carvingTool.setRegistryName("carving_tool"));
 		registry.register(crumplyHat.setRegistryName("crumply_hat"));
 		registry.register(stoneEyeballs.setRegistryName("stone_eyeballs"));
