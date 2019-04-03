@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.google.common.collect.Lists;
 import com.mraof.minestuck.entity.EntityFrog;
+import com.mraof.minestuck.entity.consort.EnumConsort;
 import com.mraof.minestuck.item.MinestuckItems;
 
 import net.minecraft.item.ItemStack;
@@ -66,6 +67,16 @@ public class EntityShopPoster extends EntityHangingArt<EntityShopPoster.ShopArt>
 	public int getType() 
 	{
 		return this.dataManager.get(TYPE);
+	}
+	
+	public static int getMetaFromProfession(EnumConsort.MerchantType profession)
+	{
+		switch (profession) 
+		{
+			default: return 0;
+			case FOOD: return 1;
+			case GENERAL: return 3;
+		}
 	}
 	
 	//NBT

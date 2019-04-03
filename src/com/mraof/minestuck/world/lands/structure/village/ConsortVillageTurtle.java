@@ -1,17 +1,31 @@
 package com.mraof.minestuck.world.lands.structure.village;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Map.Entry;
+
+import com.mraof.minestuck.Minestuck;
 import com.mraof.minestuck.entity.consort.EnumConsort;
+import com.mraof.minestuck.entity.item.EntityShopPoster;
+import com.mraof.minestuck.item.MinestuckItems;
 import com.mraof.minestuck.world.lands.gen.ChunkProviderLands;
+import com.mraof.minestuck.world.storage.loot.MinestuckLoot;
+
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityShulkerBox;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Rotation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
-
-import java.util.List;
-import java.util.Random;
+import net.minecraft.world.gen.structure.template.PlacementSettings;
+import net.minecraft.world.gen.structure.template.Template;
 
 public class ConsortVillageTurtle
 {
@@ -232,6 +246,56 @@ public class ConsortVillageTurtle
 			}
 			
 			ChunkProviderLands provider = (ChunkProviderLands) worldIn.provider.createChunkGenerator();
+			String terrain = provider.aspect1.getPrimaryName();
+			Template template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/"+terrain+"/shop"));
+			//TODO figure out rotations
+			PlacementSettings settings = new PlacementSettings().setBoundingBox(structureBoundingBoxIn);
+			BlockPos pos = new BlockPos(structureBoundingBoxIn.minX,averageGroundLvl-3,structureBoundingBoxIn.minZ);
+			template.addBlocksToWorld(worldIn, pos, settings);
+			EnumConsort.MerchantType profession = EnumConsort.getRandomMerchant(randomIn);
+			
+			System.out.println("shoppe!!!!!!!!");
+			System.out.println(pos);
+			
+			Map<BlockPos, String> datablocks = template.getDataBlocks(pos, settings);
+			for (Entry<BlockPos, String> entry : datablocks.entrySet())
+            {
+                BlockPos blockpos = entry.getKey();
+                if ("consort_shop_sign".equals(entry.getValue()))
+                {
+                    worldIn.setBlockToAir(blockpos);
+                    int meta = EntityShopPoster.getMetaFromProfession(profession);
+                    worldIn.spawnEntity(new EntityShopPoster(worldIn, pos, EnumFacing.WEST, new ItemStack(MinestuckItems.shopPoster, 1, meta), meta));
+                }
+                else if("shopkeeper".equals(entry.getValue()))
+                {
+                	worldIn.setBlockToAir(blockpos);
+                	
+                	spawnConsort(4, 1, 15, structureBoundingBoxIn, worldIn, profession, 1);
+                }
+            }
+			
+			/* TODO delet this
+			 * 
+			 * 
+			 * @Override
+    protected BlockPos generateStructure(World world, Random random, BlockPos pos, ChunkProviderLands provider) {
+        
+        rotation = random.nextBoolean();
+        
+        final Template template = world.getSaveHandler().getStructureTemplateManager().getTemplate(world.getMinecraftServer(), new ResourceLocation("minestuck:teapot"));
+        final PlacementSettings settings = new PlacementSettings().setRotation(rotation ? Rotation.CLOCKWISE_180 : Rotation.COUNTERCLOCKWISE_90);
+        
+        
+        if(world.getBlockState(new BlockPos(pos)).getMaterial().isLiquid() || !world.getBlockState(pos).getBlock().isTopSolid(world.getBlockState(pos)) || !world.canSeeSky(pos))
+            return null;
+        
+        template.addBlocksToWorld(world, pos, settings);
+        
+        return pos;
+    }
+			 * 
+			ChunkProviderLands provider = (ChunkProviderLands) worldIn.provider.createChunkGenerator();
 			IBlockState primaryBlock = provider.blockRegistry.getBlockState("structure_primary");
 			IBlockState primaryDecorBlock = provider.blockRegistry.getBlockState("structure_primary_decorative");
 			IBlockState secondaryBlock = provider.blockRegistry.getBlockState("structure_secondary");
@@ -302,6 +366,7 @@ public class ConsortVillageTurtle
 			if(!spawns[1])
 				spawns[1] = spawnConsort(9, 1, 15, structureBoundingBoxIn, worldIn, EnumConsort.getRandomMerchant(randomIn), 1);
 			
+			*/
 			return true;
 		}
 	}
