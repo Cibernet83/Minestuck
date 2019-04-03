@@ -226,7 +226,7 @@ public class ConsortVillageTurtle
 		
 		public static TurtleMarketBuilding1 createPiece(ConsortVillageCenter.VillageCenter start, List<StructureComponent> componentList, Random rand, int x, int y, int z, EnumFacing facing)
 		{
-			StructureBoundingBox structureboundingbox = StructureBoundingBox.getComponentToAddBoundingBox(x, y, z, 0, 0, 0, 14, 7, 19, facing);
+			StructureBoundingBox structureboundingbox = StructureBoundingBox.getComponentToAddBoundingBox(x, y, z, 0, 0, 0, 6, 6, 8, facing);
 			return StructureComponent.findIntersecting(componentList, structureboundingbox) == null ? new TurtleMarketBuilding1(start, rand, structureboundingbox, facing) : null;
 		}
 		
@@ -249,14 +249,13 @@ public class ConsortVillageTurtle
 			String terrain = provider.aspect1.getPrimaryName();
 			Template template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/"+terrain+"/shop"));
 			//TODO figure out rotations
-			PlacementSettings settings = new PlacementSettings().setBoundingBox(structureBoundingBoxIn);
-			BlockPos pos = new BlockPos(structureBoundingBoxIn.minX,averageGroundLvl-3,structureBoundingBoxIn.minZ);
+			PlacementSettings settings = new PlacementSettings().setBoundingBox(structureBoundingBoxIn).setRotation(getTemplateRotation());
+			BlockPos pos = new BlockPos(this.getXWithOffset(0, 0), this.getYWithOffset(0), this.getZWithOffset(0, 0));
 			template.addBlocksToWorld(worldIn, pos, settings);
 			EnumConsort.MerchantType profession = EnumConsort.getRandomMerchant(randomIn);
 			
 			System.out.println("shoppe!!!!!!!!");
 			System.out.println(pos);
-			
 			Map<BlockPos, String> datablocks = template.getDataBlocks(pos, settings);
 			for (Entry<BlockPos, String> entry : datablocks.entrySet())
             {
@@ -265,13 +264,15 @@ public class ConsortVillageTurtle
                 {
                     worldIn.setBlockToAir(blockpos);
                     int meta = EntityShopPoster.getMetaFromProfession(profession);
-                    worldIn.spawnEntity(new EntityShopPoster(worldIn, pos, EnumFacing.WEST, new ItemStack(MinestuckItems.shopPoster, 1, meta), meta));
+                    worldIn.spawnEntity(new EntityShopPoster(worldIn, blockpos, this.getCoordBaseMode().rotateYCCW(), new ItemStack(MinestuckItems.shopPoster, 1, meta), meta));
                 }
                 else if("shopkeeper".equals(entry.getValue()))
                 {
                 	worldIn.setBlockToAir(blockpos);
                 	
-                	spawnConsort(4, 1, 15, structureBoundingBoxIn, worldIn, profession, 1);
+                	System.out.println("consort y: " + averageGroundLvl + " - " + blockpos.getY() +" = " + (averageGroundLvl-blockpos.getY()));
+                	
+                	spawnConsort(blockpos, structureBoundingBoxIn, worldIn, profession, 1);
                 }
             }
 			

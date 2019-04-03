@@ -1,18 +1,36 @@
 package com.mraof.minestuck.world.lands.structure.village;
 
+import java.util.List;
+import java.util.Random;
+
 import com.google.common.collect.Lists;
 import com.mraof.minestuck.entity.consort.EntityConsort;
 import com.mraof.minestuck.entity.consort.EnumConsort;
+import com.mraof.minestuck.entity.consort.EnumConsort.MerchantType;
 import com.mraof.minestuck.util.Debug;
 import com.mraof.minestuck.world.MinestuckDimensionHandler;
 import com.mraof.minestuck.world.lands.LandAspectRegistry;
 import com.mraof.minestuck.world.lands.gen.ChunkProviderLands;
 import com.mraof.minestuck.world.lands.structure.StructureComponentUtil;
+import com.mraof.minestuck.world.lands.structure.village.ConsortVillageIguana.LargeTent1;
+import com.mraof.minestuck.world.lands.structure.village.ConsortVillageIguana.SmallTent1;
+import com.mraof.minestuck.world.lands.structure.village.ConsortVillageIguana.SmallTentStore;
+import com.mraof.minestuck.world.lands.structure.village.ConsortVillageNakagator.HighNakHousing1;
+import com.mraof.minestuck.world.lands.structure.village.ConsortVillageNakagator.HighNakInn1;
+import com.mraof.minestuck.world.lands.structure.village.ConsortVillageNakagator.HighNakMarket1;
+import com.mraof.minestuck.world.lands.structure.village.ConsortVillageSalamander.HighPipeHouse1;
+import com.mraof.minestuck.world.lands.structure.village.ConsortVillageSalamander.PipeHouse1;
+import com.mraof.minestuck.world.lands.structure.village.ConsortVillageSalamander.SmallTowerStore;
+import com.mraof.minestuck.world.lands.structure.village.ConsortVillageTurtle.LoweredShellHouse1;
+import com.mraof.minestuck.world.lands.structure.village.ConsortVillageTurtle.TurtleMarketBuilding1;
+import com.mraof.minestuck.world.lands.structure.village.ConsortVillageTurtle.TurtleTemple1;
+
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
@@ -21,14 +39,6 @@ import net.minecraft.world.gen.structure.MapGenStructureIO;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.gen.structure.StructureComponent;
 import net.minecraft.world.gen.structure.template.TemplateManager;
-
-import java.util.List;
-import java.util.Random;
-
-import static com.mraof.minestuck.world.lands.structure.village.ConsortVillageIguana.*;
-import static com.mraof.minestuck.world.lands.structure.village.ConsortVillageNakagator.*;
-import static com.mraof.minestuck.world.lands.structure.village.ConsortVillageSalamander.*;
-import static com.mraof.minestuck.world.lands.structure.village.ConsortVillageTurtle.*;
 
 public class ConsortVillageComponents
 {
@@ -319,6 +329,17 @@ public class ConsortVillageComponents
 			}
 		}
 		
+		protected Rotation getTemplateRotation()
+		{
+			switch(this.getCoordBaseMode())
+			{
+			case NORTH: return Rotation.CLOCKWISE_180;
+			case WEST: return Rotation.CLOCKWISE_90;
+			case EAST: return Rotation.COUNTERCLOCKWISE_90;
+			default: return Rotation.NONE;
+			}
+		}
+		
 		protected void clearFront(World world, StructureBoundingBox structureBB, int minX, int maxX, int y, int z)
 		{
 			for (int x = minX; x <= maxX; x++)
@@ -398,6 +419,17 @@ public class ConsortVillageComponents
 		protected boolean spawnConsort(int x, int y, int z, StructureBoundingBox boundingBox, World world, EnumConsort.MerchantType type, int maxHomeDistance)
 		{
 			BlockPos pos = new BlockPos(this.getXWithOffset(x, z), this.getYWithOffset(y), this.getZWithOffset(x, z));
+			return spawnConsort(pos, boundingBox, world, type, maxHomeDistance);
+		}
+		
+		protected boolean spawnConsort(BlockPos pos, StructureBoundingBox boundingBox, World world, EnumConsort.MerchantType type, int maxHomeDistance)
+		{
+			
+			if(type != MerchantType.NONE)
+			{
+				System.out.println("shopkeeper  pos:");
+				System.out.println(pos);
+			}
 			
 			if(boundingBox.isVecInside(pos))
 			{
@@ -420,6 +452,7 @@ public class ConsortVillageComponents
 					
 					consort.onInitialSpawn(world.getDifficultyForLocation(new BlockPos(consort)), null);
 					
+					
 					world.spawnEntity(consort);
 					return true;
 				} catch(Exception e)
@@ -427,6 +460,7 @@ public class ConsortVillageComponents
 					e.printStackTrace();
 				}
 			}
+			Debug.warn("tried to spawn a consort outside of a boundingbox");
 			return false;
 		}
 	}
