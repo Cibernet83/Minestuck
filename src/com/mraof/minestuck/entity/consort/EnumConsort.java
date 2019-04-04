@@ -57,6 +57,7 @@ public enum EnumConsort
 		SHADY,
 		FOOD,
 		GENERAL,
+		INNKEEPER,
 		;
 		public static MerchantType getFromString(String str)
 		{

@@ -409,6 +409,12 @@ public class ConsortDialogue
 		addMessage(new MerchantGuiMessage(new SingleMessage("bucketsGeneralShop"), CONSORT_GENERAL_STOCK)).type(MerchantType.GENERAL).landTitle(fromNameTitle("buckets"));
 		
 		addMessage(new MerchantGuiMessage(new SingleMessage("boringShop"), CONSORT_GENERAL_STOCK)).type(MerchantType.GENERAL).landTerrain(fromNameTerrain("rainbow"));
+		
+		addMessage(new SingleMessage("innPlasticBeds")).type(MerchantType.INNKEEPER);
+		addMessage(new SingleMessage("innKeeper")).type(MerchantType.INNKEEPER);
+		addMessage(new SingleMessage("innTertainer")).type(MerchantType.INNKEEPER);
+		addMessage(new SingleMessage("innLowPrices")).type(MerchantType.INNKEEPER);
+		
 	}
 	
 	public static DialogueWrapper addMessage(String message, String... args)
