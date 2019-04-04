@@ -28,7 +28,7 @@ public class ConsortVillageCenter
 		MapGenStructureIO.registerStructureComponent(ConsortVillageCenter.VillageMarketCenter.class, "MinestuckCVCM");
 		MapGenStructureIO.registerStructureComponent(ConsortVillageCenter.RockCenter.class, "MinestuckCVCRo");
 		MapGenStructureIO.registerStructureComponent(ConsortVillageCenter.CactusPyramidCenter.class, "MinestuckCVCCaPy");
-		MapGenStructureIO.registerStructureComponent(ConsortVillageTurtle.TurtleWellCenter.class, "MinestuckCVCTuWe");
+		MapGenStructureIO.registerStructureComponent(ConsortVillageTurtle.TurtleCenter.class, "MinestuckCVCTuWe");
 		MapGenStructureIO.registerStructureComponent(ConsortVillageNakagator.RadioTowerCenter.class, "MinestuckCVCRaTo");
 		MapGenStructureIO.registerStructureComponent(ConsortVillageSalamander.RuinedTowerMushroomCenter.class, "MinestuckCVCRuToM");
 		
@@ -48,12 +48,12 @@ public class ConsortVillageCenter
 	{
 		List<CenterEntry> weightList = Lists.newArrayList();
 		
-		if(landAspects.aspectTerrain.getPrimaryVariant().getPrimaryName().equals("rock"))
-			weightList.add(new CenterEntry(RockCenter.class, 5));
-		if(landAspects.aspectTerrain.getPrimaryVariant().getPrimaryName().equals("sand"))
-			weightList.add(new CenterEntry(CactusPyramidCenter.class, 5));
+		//if(landAspects.aspectTerrain.getPrimaryVariant().getPrimaryName().equals("rock"))
+		//	weightList.add(new CenterEntry(RockCenter.class, 5));
+		//if(landAspects.aspectTerrain.getPrimaryVariant().getPrimaryName().equals("sand"))
+		//	weightList.add(new CenterEntry(CactusPyramidCenter.class, 5));
 		if(landAspects.aspectTerrain.getConsortType().equals(EnumConsort.TURTLE))
-			weightList.add(new CenterEntry(ConsortVillageTurtle.TurtleWellCenter.class, 5));
+			weightList.add(new CenterEntry(ConsortVillageTurtle.TurtleCenter.class, 5));
 		if(landAspects.aspectTerrain.getConsortType().equals(EnumConsort.NAKAGATOR))
 			weightList.add(new CenterEntry(ConsortVillageNakagator.RadioTowerCenter.class, 5));
 		if(landAspects.aspectTerrain.getConsortType().equals(EnumConsort.SALAMANDER))

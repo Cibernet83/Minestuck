@@ -2,24 +2,29 @@ package com.mraof.minestuck.world.lands.structure.village;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import com.mraof.minestuck.Minestuck;
+import com.mraof.minestuck.entity.EntityFrog;
 import com.mraof.minestuck.entity.consort.EnumConsort;
+import com.mraof.minestuck.entity.consort.EnumConsort.MerchantType;
 import com.mraof.minestuck.entity.item.EntityShopPoster;
 import com.mraof.minestuck.item.MinestuckItems;
+import com.mraof.minestuck.world.MinestuckDimensionHandler;
 import com.mraof.minestuck.world.lands.gen.ChunkProviderLands;
+import com.mraof.minestuck.world.lands.structure.blocks.StructureBlockUtil;
 import com.mraof.minestuck.world.storage.loot.MinestuckLoot;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockCrops;
+import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityShulkerBox;
+import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
@@ -29,14 +34,14 @@ import net.minecraft.world.gen.structure.template.Template;
 
 public class ConsortVillageTurtle
 {
-	public static class TurtleWellCenter extends ConsortVillageCenter.VillageCenter
+	public static class TurtleCenter extends ConsortVillageCenter.VillageCenter
 	{
-		public TurtleWellCenter()
+		public TurtleCenter()
 		{
 			super();
 		}
 		
-		public TurtleWellCenter(List<ConsortVillageComponents.PieceWeight> pieceWeightList, int x, int z, Random rand)
+		public TurtleCenter(List<ConsortVillageComponents.PieceWeight> pieceWeightList, int x, int z, Random rand)
 		{
 			super(pieceWeightList);
 			this.setCoordBaseMode(EnumFacing.Plane.HORIZONTAL.random(rand));
@@ -56,6 +61,7 @@ public class ConsortVillageTurtle
 		@Override
 		public boolean addComponentParts(World worldIn, Random randomIn, StructureBoundingBox structureBoundingBoxIn)
 		{
+			if(worldIn.isRemote) return true;
 			if (this.averageGroundLvl < 0)
 			{
 				this.averageGroundLvl = this.getAverageGroundLevel(worldIn, structureBoundingBoxIn);
@@ -69,67 +75,19 @@ public class ConsortVillageTurtle
 			}
 			
 			ChunkProviderLands provider = (ChunkProviderLands) worldIn.provider.createChunkGenerator();
-			IBlockState primary = provider.blockRegistry.getBlockState("structure_primary");
-			IBlockState secondary = provider.blockRegistry.getBlockState("structure_secondary");
-			IBlockState fluid = provider.blockRegistry.getBlockState("ocean");
-			IBlockState stairsN = provider.blockRegistry.getStairs("structure_primary_stairs", EnumFacing.NORTH, false);
-			IBlockState stairsE = provider.blockRegistry.getStairs("structure_primary_stairs", EnumFacing.EAST, false);
-			IBlockState stairsS = provider.blockRegistry.getStairs("structure_primary_stairs", EnumFacing.SOUTH, false);
-			IBlockState stairsW = provider.blockRegistry.getStairs("structure_primary_stairs", EnumFacing.WEST, false);
+			String terrain = MinestuckDimensionHandler.getAspects(worldIn.provider.getDimension()).aspectTerrain.getPrimaryName();
+			String[] pieces = new String[] {"well", "park"};
+			String piece = pieces[randomIn.nextInt(pieces.length-1)];
+			Template template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/"+terrain+"/"+piece));
+			if(template == null) template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/default/"+piece));
 			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 4, 0, 2, 4, 0, primary, primary, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 4, 1, 0, 4, 2, primary, primary, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 5, 4, 0, 7, 4, 0, primary, primary, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 7, 4, 1, 7, 4, 2, primary, primary, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 4, 7, 2, 4, 7, primary, primary, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 4, 5, 0, 4, 6, primary, primary, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 5, 4, 7, 7, 4, 7, primary, primary, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 7, 4, 5, 7, 4, 6, primary, primary, false);
+			PlacementSettings settings = new PlacementSettings().setBoundingBox(structureBoundingBoxIn).setRotation(getTemplateRotation());
+			BlockPos pos = new BlockPos(this.getXWithOffset(0, 0), this.getYWithOffset(0), this.getZWithOffset(0, 0));
+			template.addBlocksToWorld(worldIn, pos, settings);
 			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 3, 4, 0, 4, 4, 0, stairsN, stairsN, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 3, 4, 7, 4, 4, 7, stairsS, stairsS, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 4, 3, 0, 4, 4, stairsW, stairsW, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 7, 4, 3, 7, 4, 4, stairsE, stairsE, false);
-			
-			this.fillWithAir(worldIn, structureBoundingBoxIn, 1, 5, 0, 6, 7, 0);
-			this.fillWithAir(worldIn, structureBoundingBoxIn, 1, 5, 7, 6, 7, 7);
-			this.fillWithAir(worldIn, structureBoundingBoxIn, 0, 5, 1, 0, 7, 6);
-			this.fillWithAir(worldIn, structureBoundingBoxIn, 7, 5, 1, 7, 7, 6);
-			
-			this.fillWithAir(worldIn, structureBoundingBoxIn, 1, 4, 1, 6, 8, 6);
-			this.fillWithAir(worldIn, structureBoundingBoxIn, 2, 3, 2, 5, 3, 5);
-			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 5, 0, 0, 7, 0, primary, primary, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 5, 7, 0, 7, 7, primary, primary, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 7, 5, 0, 7, 7, 0, primary, primary, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 7, 5, 7, 7, 7, 7, primary, primary, false);
-			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 8, 0, 7, 8, 0, primary, primary, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 8, 7, 7, 8, 7, primary, primary, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 8, 1, 0, 8, 6, primary, primary, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 7, 8, 1, 7, 8, 6, primary, primary, false);
-			this.setBlockState(worldIn, primary, 1, 8, 1, structureBoundingBoxIn);
-			this.setBlockState(worldIn, primary, 1, 8, 6, structureBoundingBoxIn);
-			this.setBlockState(worldIn, primary, 6, 8, 1, structureBoundingBoxIn);
-			this.setBlockState(worldIn, primary, 6, 8, 6, structureBoundingBoxIn);
-			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 9, 1, 6, 9, 6, primary, primary, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 2, 10, 2, 5, 10, 5, primary, primary, false);
-			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 1, 1, 6, 3, 1, secondary, secondary, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 1, 6, 6, 3, 6, secondary, secondary, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 1, 2, 1, 3, 5, secondary, secondary, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 6, 1, 2, 6, 3, 5, secondary, secondary, false);
-			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 3, 3, 1, 4, 3, 1, stairsN, stairsN, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 3, 3, 6, 4, 3, 6, stairsS, stairsS, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 3, 3, 1, 3, 4, stairsW, stairsW, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 6, 3, 3, 6, 3, 4, stairsE, stairsE, false);
-			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 2, 0, 2, 5, 1, 5, secondary, secondary, false);
-			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 2, 2, 2, 5, 2, 5, fluid, fluid, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 3, 1, 3, 4, 1, 4, fluid, fluid, false);
+			System.out.println(piece);
+			System.out.println(pos);
+			Map<BlockPos, String> datablocks = template.getDataBlocks(pos, settings);
 			
 			return true;
 		}
@@ -159,6 +117,7 @@ public class ConsortVillageTurtle
 		@Override
 		public boolean addComponentParts(World worldIn, Random randomIn, StructureBoundingBox structureBoundingBoxIn)
 		{
+			if(worldIn.isRemote) return true;
 			if (this.averageGroundLvl < 0)
 			{
 				this.averageGroundLvl = this.getAverageGroundLevel(worldIn, structureBoundingBoxIn);
@@ -168,43 +127,33 @@ public class ConsortVillageTurtle
 					return true;
 				}
 				
-				this.boundingBox.offset(0, this.averageGroundLvl - this.boundingBox.minY - 3, 0);
+				this.boundingBox.offset(0, this.averageGroundLvl - this.boundingBox.minY - 1, 0);
 			}
 			
 			ChunkProviderLands provider = (ChunkProviderLands) worldIn.provider.createChunkGenerator();
-			IBlockState buildBlock = provider.blockRegistry.getBlockState("structure_primary");
-			IBlockState lightBlock = provider.blockRegistry.getBlockState("light_block");
+			String terrain = MinestuckDimensionHandler.getAspects(worldIn.provider.getDimension()).aspectTerrain.getPrimaryName();
+			Template template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/"+terrain+"/house"));
+			if(template == null) template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/default/house"));
 			
-			this.fillWithAir(worldIn, structureBoundingBoxIn, 1, 1, 2, 6, 4, 7);
-			this.fillWithAir(worldIn, structureBoundingBoxIn, 3, 3, 1, 4, 4, 1);
-			this.fillWithAir(worldIn, structureBoundingBoxIn, 2, 5, 6, 2, 5, 6);
+			PlacementSettings settings = new PlacementSettings().setBoundingBox(structureBoundingBoxIn).setRotation(getTemplateRotation());
+			BlockPos pos = new BlockPos(this.getXWithOffset(0, 0), this.getYWithOffset(0)-2, this.getZWithOffset(0, 0));
+			template.addBlocksToWorld(worldIn, pos, settings);
 			
-			this.clearFront(worldIn, structureBoundingBoxIn, 2, 5, 3, 0);
-			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 0, 1, 7, 0, 8, buildBlock, buildBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 1, 8, 7, 4, 8, buildBlock, buildBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 1, 1, 0, 4, 7, buildBlock, buildBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 7, 1, 1, 7, 4, 7, buildBlock, buildBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 1, 1, 6, 2, 1, buildBlock, buildBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 3, 1, 2, 4, 1, buildBlock, buildBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 5, 3, 1, 6, 4, 1, buildBlock, buildBlock, false);
-			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 3, 1, 2, 4, 1, 2, buildBlock, buildBlock, false);
-			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 3, 5, 1, 4, 5, 1, buildBlock, buildBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 5, 2, 6, 5, 2, buildBlock, buildBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 5, 3, 1, 5, 7, buildBlock, buildBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 6, 5, 3, 6, 5, 7, buildBlock, buildBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 2, 5, 7, 5, 5, 7, buildBlock, buildBlock, false);
-			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 2, 6, 3, 5, 6, 6, buildBlock, buildBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 3, 6, 4, 4, 6, 5, lightBlock, lightBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 3, 7, 4, 4, 7, 5, buildBlock, buildBlock, false);
-			
-			if(!spawns[0])
-				spawns[0] = spawnConsort(2, 1, 5, structureBoundingBoxIn, worldIn);
-			if(!spawns[1])
-				spawns[1] = spawnConsort(5, 1, 5, structureBoundingBoxIn, worldIn);
+			System.out.println("house");
+			System.out.println(pos);
+			Map<BlockPos, String> datablocks = template.getDataBlocks(pos, settings);
+			for (Entry<BlockPos, String> entry : datablocks.entrySet())
+            {
+                BlockPos blockpos = entry.getKey();
+                if ("civilian".equals(entry.getValue()))
+                {
+                    worldIn.setBlockToAir(blockpos);
+                    if(!spawns[0])
+        				spawns[0] = spawnConsort(blockpos, structureBoundingBoxIn, worldIn, EnumConsort.MerchantType.NONE, 48);
+        			if(!spawns[1])
+        				spawns[1] = spawnConsort(blockpos, structureBoundingBoxIn, worldIn, EnumConsort.MerchantType.NONE, 48);
+                }
+            }
 			
 			return true;
 		}
@@ -233,6 +182,7 @@ public class ConsortVillageTurtle
 		@Override
 		public boolean addComponentParts(World worldIn, Random randomIn, StructureBoundingBox structureBoundingBoxIn)
 		{
+			if(worldIn.isRemote) return true;
 			if (this.averageGroundLvl < 0)
 			{
 				this.averageGroundLvl = this.getAverageGroundLevel(worldIn, structureBoundingBoxIn);
@@ -246,15 +196,16 @@ public class ConsortVillageTurtle
 			}
 			
 			ChunkProviderLands provider = (ChunkProviderLands) worldIn.provider.createChunkGenerator();
-			String terrain = provider.aspect1.getPrimaryName();
+			String terrain = MinestuckDimensionHandler.getAspects(worldIn.provider.getDimension()).aspectTerrain.getPrimaryName();
 			Template template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/"+terrain+"/shop"));
-			//TODO figure out rotations
+			if(template == null) template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/default/shop"));
+			
 			PlacementSettings settings = new PlacementSettings().setBoundingBox(structureBoundingBoxIn).setRotation(getTemplateRotation());
-			BlockPos pos = new BlockPos(this.getXWithOffset(0, 0), this.getYWithOffset(0), this.getZWithOffset(0, 0));
+			BlockPos pos = new BlockPos(this.getXWithOffset(0, 0), this.getYWithOffset(0)-2, this.getZWithOffset(0, 0));
 			template.addBlocksToWorld(worldIn, pos, settings);
 			EnumConsort.MerchantType profession = EnumConsort.getRandomMerchant(randomIn);
 			
-			System.out.println("shoppe!!!!!!!!");
+			System.out.println(profession.toString().toLowerCase() + " store");
 			System.out.println(pos);
 			Map<BlockPos, String> datablocks = template.getDataBlocks(pos, settings);
 			for (Entry<BlockPos, String> entry : datablocks.entrySet())
@@ -269,105 +220,10 @@ public class ConsortVillageTurtle
                 else if("shopkeeper".equals(entry.getValue()))
                 {
                 	worldIn.setBlockToAir(blockpos);
-                	
-                	System.out.println("consort y: " + averageGroundLvl + " - " + blockpos.getY() +" = " + (averageGroundLvl-blockpos.getY()));
-                	
                 	spawnConsort(blockpos, structureBoundingBoxIn, worldIn, profession, 1);
                 }
             }
 			
-			/* TODO delet this
-			 * 
-			 * 
-			 * @Override
-    protected BlockPos generateStructure(World world, Random random, BlockPos pos, ChunkProviderLands provider) {
-        
-        rotation = random.nextBoolean();
-        
-        final Template template = world.getSaveHandler().getStructureTemplateManager().getTemplate(world.getMinecraftServer(), new ResourceLocation("minestuck:teapot"));
-        final PlacementSettings settings = new PlacementSettings().setRotation(rotation ? Rotation.CLOCKWISE_180 : Rotation.COUNTERCLOCKWISE_90);
-        
-        
-        if(world.getBlockState(new BlockPos(pos)).getMaterial().isLiquid() || !world.getBlockState(pos).getBlock().isTopSolid(world.getBlockState(pos)) || !world.canSeeSky(pos))
-            return null;
-        
-        template.addBlocksToWorld(world, pos, settings);
-        
-        return pos;
-    }
-			 * 
-			ChunkProviderLands provider = (ChunkProviderLands) worldIn.provider.createChunkGenerator();
-			IBlockState primaryBlock = provider.blockRegistry.getBlockState("structure_primary");
-			IBlockState primaryDecorBlock = provider.blockRegistry.getBlockState("structure_primary_decorative");
-			IBlockState secondaryBlock = provider.blockRegistry.getBlockState("structure_secondary");
-			IBlockState lightBlock = provider.blockRegistry.getBlockState("light_block");
-			IBlockState glassBlock = provider.blockRegistry.getBlockState("glass");
-			
-			this.fillWithAir(worldIn, structureBoundingBoxIn, 6, 1, 1, 7, 3, 3);
-			this.fillWithAir(worldIn, structureBoundingBoxIn, 1, 1, 4, 12, 4, 13);
-			this.fillWithAir(worldIn, structureBoundingBoxIn, 1, 2, 14, 12, 4, 14);
-			this.fillWithAir(worldIn, structureBoundingBoxIn, 1, 1, 15, 12, 4, 17);
-			this.fillWithAir(worldIn, structureBoundingBoxIn, 2, 5, 3, 11, 5, 16);
-			this.clearFront(worldIn, structureBoundingBoxIn, 5, 8, 2, 0);
-			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, -1, 4, 12, 0, 17, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 5, -1, 1, 8, 0, 3, secondaryBlock, secondaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 5, 1, 1, 5, 3, 3, secondaryBlock, secondaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 8, 1, 1, 8, 3, 3, secondaryBlock, secondaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 6, 4, 1, 7, 4, 3, secondaryBlock, secondaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, -1, 3, 4, 1, 3, secondaryBlock, secondaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 9, -1, 3, 13, 1, 3, secondaryBlock, secondaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, -1, 4, 0, 1, 18, secondaryBlock, secondaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 13, -1, 4, 13, 1, 18, secondaryBlock, secondaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, -1, 18, 12, 1, 18, secondaryBlock, secondaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 2, 3, 4, 3, 3, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 9, 2, 3, 13, 3, 3, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 2, 4, 0, 3, 18, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 13, 2, 4, 13, 3, 18, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 2, 18, 12, 3, 18, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 4, 3, 5, 4, 3, glassBlock, glassBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 8, 4, 3, 13, 4, 3, glassBlock, glassBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 4, 4, 0, 4, 18, glassBlock, glassBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 13, 4, 4, 13, 4, 18, glassBlock, glassBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 4, 18, 12, 4, 18, glassBlock, glassBlock, false);
-			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 5, 4, 12, 5, 4, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 5, 5, 1, 5, 17, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 12, 5, 5, 12, 5, 17, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 2, 5, 17, 11, 5, 17, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 2, 6, 5, 11, 6, 16, primaryBlock, primaryBlock, false);
-			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 1, 14, 12, 1, 14, secondaryBlock, secondaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 6, 0, 4, 7, 0, 7, primaryDecorBlock, primaryDecorBlock, false);
-			this.setBlockState(worldIn, primaryDecorBlock, 5, 0, 8, structureBoundingBoxIn);
-			this.setBlockState(worldIn, primaryDecorBlock, 8, 0, 8, structureBoundingBoxIn);
-			this.setBlockState(worldIn, primaryDecorBlock, 4, 0, 9, structureBoundingBoxIn);
-			this.setBlockState(worldIn, primaryDecorBlock, 9, 0, 9, structureBoundingBoxIn);
-			this.setBlockState(worldIn, primaryDecorBlock, 3, 0, 10, structureBoundingBoxIn);
-			this.setBlockState(worldIn, primaryDecorBlock, 10, 0, 10, structureBoundingBoxIn);
-			this.setBlockState(worldIn, primaryDecorBlock, 4, 0, 11, structureBoundingBoxIn);
-			this.setBlockState(worldIn, primaryDecorBlock, 9, 0, 11, structureBoundingBoxIn);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 5, 0, 12, 8, 0, 12, primaryDecorBlock, primaryDecorBlock, false);
-			
-			this.setBlockState(worldIn, lightBlock, 5, 1, 1, structureBoundingBoxIn);
-			this.setBlockState(worldIn, lightBlock, 8, 1, 1, structureBoundingBoxIn);
-			this.setBlockState(worldIn, lightBlock, 1, 0, 4, structureBoundingBoxIn);
-			this.setBlockState(worldIn, lightBlock, 12, 0, 4, structureBoundingBoxIn);
-			this.setBlockState(worldIn, lightBlock, 1, 0, 13, structureBoundingBoxIn);
-			this.setBlockState(worldIn, lightBlock, 12, 0, 13, structureBoundingBoxIn);
-			this.setBlockState(worldIn, lightBlock, 1, 0, 17, structureBoundingBoxIn);
-			this.setBlockState(worldIn, lightBlock, 12, 0, 17, structureBoundingBoxIn);
-			this.setBlockState(worldIn, lightBlock, 2, 6, 5, structureBoundingBoxIn);
-			this.setBlockState(worldIn, lightBlock, 11, 6, 5, structureBoundingBoxIn);
-			this.setBlockState(worldIn, lightBlock, 2, 6, 16, structureBoundingBoxIn);
-			this.setBlockState(worldIn, lightBlock, 11, 6, 16, structureBoundingBoxIn);
-			
-			if(!spawns[0])
-				spawns[0] = spawnConsort(4, 1, 15, structureBoundingBoxIn, worldIn, EnumConsort.getRandomMerchant(randomIn), 1);
-			if(!spawns[1])
-				spawns[1] = spawnConsort(9, 1, 15, structureBoundingBoxIn, worldIn, EnumConsort.getRandomMerchant(randomIn), 1);
-			
-			*/
 			return true;
 		}
 	}
@@ -395,6 +251,7 @@ public class ConsortVillageTurtle
 		@Override
 		public boolean addComponentParts(World worldIn, Random randomIn, StructureBoundingBox structureBoundingBoxIn)
 		{
+			if(worldIn.isRemote) return true;
 			if (this.averageGroundLvl < 0)
 			{
 				this.averageGroundLvl = this.getAverageGroundLevel(worldIn, structureBoundingBoxIn);
@@ -408,87 +265,185 @@ public class ConsortVillageTurtle
 			}
 			
 			ChunkProviderLands provider = (ChunkProviderLands) worldIn.provider.createChunkGenerator();
-			IBlockState primaryBlock = provider.blockRegistry.getBlockState("structure_primary");
-			IBlockState secondaryBlock = provider.blockRegistry.getBlockState("structure_secondary");
-			IBlockState lightBlock = provider.blockRegistry.getBlockState("light_block");
-			IBlockState glassBlock1 = provider.blockRegistry.getBlockState("stained_glass_1");
-			IBlockState glassBlock2 = provider.blockRegistry.getBlockState("stained_glass_2");
+			String terrain = MinestuckDimensionHandler.getAspects(worldIn.provider.getDimension()).aspectTerrain.getPrimaryName();
+			Template template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/"+terrain+"/temple"));
+			if(template == null) template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/default/temple"));
 			
-			this.fillWithAir(worldIn, structureBoundingBoxIn, 1, 1, 2, 9, 5, 4);
-			this.fillWithAir(worldIn, structureBoundingBoxIn, 1, 1, 5, 9, 4, 6);
-			this.fillWithAir(worldIn, structureBoundingBoxIn, 1, 0, 7, 9, 3, 12);
-			this.clearFront(worldIn, structureBoundingBoxIn, 4, 6, 1, 0);
+			PlacementSettings settings = new PlacementSettings().setBoundingBox(structureBoundingBoxIn).setRotation(getTemplateRotation());
+			BlockPos pos = new BlockPos(this.getXWithOffset(0, 0), this.getYWithOffset(0)-1, this.getZWithOffset(0, 0));
+			template.addBlocksToWorld(worldIn, pos, settings);
 			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 0, 2, 9, 0, 6, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, -1, 6, 9, -1, 12, primaryBlock, primaryBlock, false);
-			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 0, 1, 10, 1, 1, secondaryBlock, secondaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 4, 2, 1, 6, 3, 1, secondaryBlock, secondaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 0, 2, 0, 1, 4, secondaryBlock, secondaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 10, 0, 2, 10, 1, 4, secondaryBlock, secondaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 0, 5, 0, 1, 6, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, -1, 7, 0, 3, 13, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 10, 0, 5, 10, 1, 6, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 10, -1, 7, 10, 3, 13, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, -1, 13, 9, 3, 13, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 4, 1, 9, 5, 1, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 2, 1, 0, 5, 4, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 4, 5, 0, 4, 6, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 10, 2, 1, 10, 5, 4, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 10, 4, 5, 10, 4, 6, primaryBlock, primaryBlock, false);
-			
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 4, 7, 9, 4, 12, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 5, 5, 9, 5, 6, primaryBlock, primaryBlock, false);
-			this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 6, 2, 9, 6, 4, primaryBlock, primaryBlock, false);
-			
-			this.setBlockState(worldIn, lightBlock, 1, 0, 2, structureBoundingBoxIn);
-			this.setBlockState(worldIn, lightBlock, 9, 0, 2, structureBoundingBoxIn);
-			this.setBlockState(worldIn, lightBlock, 1, -1, 12, structureBoundingBoxIn);
-			this.setBlockState(worldIn, lightBlock, 9, -1, 12, structureBoundingBoxIn);
-			
-			this.setBlockState(worldIn, glassBlock1, 1, 2, 1, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock1, 1, 3, 1, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock2, 2, 2, 1, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock2, 2, 3, 1, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock1, 2, 4, 1, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock1, 3, 2, 1, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock1, 3, 3, 1, structureBoundingBoxIn);
-			
-			this.setBlockState(worldIn, glassBlock1, 7, 2, 1, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock1, 7, 3, 1, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock2, 8, 2, 1, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock2, 8, 3, 1, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock1, 8, 4, 1, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock1, 9, 2, 1, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock1, 9, 3, 1, structureBoundingBoxIn);
-			
-			this.setBlockState(worldIn, glassBlock2, 0, 2, 4, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock1, 0, 3, 4, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock1, 0, 2, 5, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock2, 0, 3, 5, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock2, 0, 2, 6, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock1, 0, 3, 6, structureBoundingBoxIn);
-			
-			this.setBlockState(worldIn, glassBlock2, 10, 2, 4, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock1, 10, 3, 4, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock1, 10, 2, 5, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock2, 10, 3, 5, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock2, 10, 2, 6, structureBoundingBoxIn);
-			this.setBlockState(worldIn, glassBlock1, 10, 3, 6, structureBoundingBoxIn);
-			
-			generateDoor(worldIn, structureBoundingBoxIn, randomIn, 5, 1, 1, EnumFacing.SOUTH, Blocks.IRON_DOOR);
-			
-			setBlockState(worldIn, Blocks.STONE_BUTTON.getDefaultState(), 6, 1, 0, structureBoundingBoxIn);
-			setBlockState(worldIn, Blocks.STONE_BUTTON.getDefaultState().withRotation(Rotation.CLOCKWISE_180), 4, 1, 2, structureBoundingBoxIn);
-			
-			if(!spawns[0])
-				spawns[0] = spawnConsort(4, 0, 10, structureBoundingBoxIn, worldIn);
-			if(!spawns[1])
-				spawns[1] = spawnConsort(5, 0, 10, structureBoundingBoxIn, worldIn);
-			if(!spawns[2])
-				spawns[2] = spawnConsort(6, 0, 10, structureBoundingBoxIn, worldIn);
+			System.out.println("temple");
+			System.out.println(pos);
+			Map<BlockPos, String> datablocks = template.getDataBlocks(pos, settings);
+			for (Entry<BlockPos, String> entry : datablocks.entrySet())
+            {
+                BlockPos blockpos = entry.getKey();
+                if ("frog".equals(entry.getValue()))
+                {
+                	worldIn.setBlockToAir(blockpos);
+                	int chance = new Random().nextInt(100);
+                	if(chance == 1) worldIn.spawnEntity(new EntityFrog(worldIn));
+                }
+                
+            }
 			
 			return true;
 		}
 	}
+
+	public static class TurtleProfessionalBuilding extends ConsortVillageComponents.ConsortVillagePiece
+	{
+		
+		public TurtleProfessionalBuilding()
+		{
+			spawns = new boolean[1];
+		}
+		
+		public TurtleProfessionalBuilding(ConsortVillageCenter.VillageCenter start, Random rand, StructureBoundingBox boundingBox, EnumFacing facing)
+		{
+			this();
+			this.setCoordBaseMode(facing);
+			this.boundingBox = boundingBox;
+		}
+		
+		public static TurtleProfessionalBuilding createPiece(ConsortVillageCenter.VillageCenter start, List<StructureComponent> componentList, Random rand, int x, int y, int z, EnumFacing facing)
+		{
+			StructureBoundingBox structureboundingbox = StructureBoundingBox.getComponentToAddBoundingBox(x, y, z, 0, -1, 0, 11, 6, 14, facing);
+			return StructureComponent.findIntersecting(componentList, structureboundingbox) == null ? new TurtleProfessionalBuilding(start, rand, structureboundingbox, facing) : null;
+		}
+		
+		@Override
+		public boolean addComponentParts(World worldIn, Random randomIn, StructureBoundingBox structureBoundingBoxIn) 
+		{
+			if(worldIn.isRemote) return true;
+			if (this.averageGroundLvl < 0)
+			{
+				this.averageGroundLvl = this.getAverageGroundLevel(worldIn, structureBoundingBoxIn);
+				
+				if (this.averageGroundLvl < 0)
+				{
+					return true;
+				}
+				
+				this.boundingBox.offset(0, this.averageGroundLvl - this.boundingBox.minY - 1, 0);
+			}
+			
+			ChunkProviderLands provider = (ChunkProviderLands) worldIn.provider.createChunkGenerator();
+			String terrain = MinestuckDimensionHandler.getAspects(worldIn.provider.getDimension()).aspectTerrain.getPrimaryName();
+			String[] buildings = new String[] {"inn","smith","library", "farm"};
+			String building = buildings[randomIn.nextInt(buildings.length-1)];
+			Template template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/"+terrain+"/"+building));
+			if(template == null) template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/default/"+building));
+			
+			PlacementSettings settings = new PlacementSettings().setBoundingBox(structureBoundingBoxIn).setRotation(getTemplateRotation());
+			BlockPos pos = new BlockPos(this.getXWithOffset(0, 0), this.getYWithOffset(0)-1, this.getZWithOffset(0, 0));
+			template.addBlocksToWorld(worldIn, pos, settings);
+			
+			System.out.println(building);
+			System.out.println(pos);
+			Map<BlockPos, String> datablocks = template.getDataBlocks(pos, settings);
+			for (Entry<BlockPos, String> entry : datablocks.entrySet())
+            {
+                BlockPos blockpos = entry.getKey();
+                if ("loot".equals(entry.getValue()))
+                {
+                	//TODO custom loot
+                	StructureBlockUtil.placeLootChest(blockpos, worldIn, structureBoundingBoxIn, getCoordBaseMode().getOpposite(), MinestuckLoot.BASIC_MEDIUM_CHEST, randomIn);
+                }
+                else if("innkeeper".equals(entry.getValue()))
+                {
+                	worldIn.setBlockToAir(blockpos);
+                	//TODO innkeeper profession
+                	spawnConsort(blockpos, structureBoundingBoxIn, worldIn, MerchantType.INNKEEPER, 1);
+                }
+                else if("farmland".equals(entry.getValue()))
+                {
+                	worldIn.setBlockState(blockpos, Blocks.FARMLAND.getDefaultState());
+                	
+                	Block[] crops = new Block[] {Blocks.WHEAT,Blocks.CARROTS,Blocks.BEETROOTS,Blocks.POTATOES};
+                	IBlockState state = crops[randomIn.nextInt(crops.length-1)].getDefaultState();
+                	if(state.getBlock() instanceof BlockCrops)
+                		state = state.withProperty(((BlockCrops)state.getBlock()).AGE, randomIn.nextInt(((BlockCrops)state.getBlock()).getMaxAge()));
+                	worldIn.setBlockState(blockpos.up(), state);
+                }
+                
+            }
+			
+			return true;
+		}
+		
+	}
+	public static class TurtleStorage extends ConsortVillageComponents.ConsortVillagePiece
+	{
+		
+		public TurtleStorage()
+		{
+			spawns = new boolean[1];
+		}
+		
+		public TurtleStorage(ConsortVillageCenter.VillageCenter start, Random rand, StructureBoundingBox boundingBox, EnumFacing facing)
+		{
+			this();
+			this.setCoordBaseMode(facing);
+			this.boundingBox = boundingBox;
+		}
+		
+		public static TurtleStorage createPiece(ConsortVillageCenter.VillageCenter start, List<StructureComponent> componentList, Random rand, int x, int y, int z, EnumFacing facing)
+		{
+			StructureBoundingBox structureboundingbox = StructureBoundingBox.getComponentToAddBoundingBox(x, y, z, 0, -1, 0, 11, 6, 14, facing);
+			return StructureComponent.findIntersecting(componentList, structureboundingbox) == null ? new TurtleStorage(start, rand, structureboundingbox, facing) : null;
+		}
+		
+		@Override
+		public boolean addComponentParts(World worldIn, Random randomIn, StructureBoundingBox structureBoundingBoxIn) 
+		{
+			if(worldIn.isRemote) return true;
+			if (this.averageGroundLvl < 0)
+			{
+				this.averageGroundLvl = this.getAverageGroundLevel(worldIn, structureBoundingBoxIn);
+				
+				if (this.averageGroundLvl < 0)
+				{
+					return true;
+				}
+				
+				this.boundingBox.offset(0, this.averageGroundLvl - this.boundingBox.minY - 1, 0);
+			}
+			
+			ChunkProviderLands provider = (ChunkProviderLands) worldIn.provider.createChunkGenerator();
+			String terrain = MinestuckDimensionHandler.getAspects(worldIn.provider.getDimension()).aspectTerrain.getPrimaryName();
+			Template template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/"+terrain+"/storage"));
+			if(template == null) template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/default/storage"));
+			
+			PlacementSettings settings = new PlacementSettings().setBoundingBox(structureBoundingBoxIn).setRotation(getTemplateRotation());
+			BlockPos pos = new BlockPos(this.getXWithOffset(0, 0), this.getYWithOffset(0)-1, this.getZWithOffset(0, 0));
+			template.addBlocksToWorld(worldIn, pos, settings);
+			
+			System.out.println("storage");
+			System.out.println(pos);
+			Map<BlockPos, String> datablocks = template.getDataBlocks(pos, settings);
+			for (Entry<BlockPos, String> entry : datablocks.entrySet())
+            {
+                BlockPos blockpos = entry.getKey();
+                if ("gourd".equals(entry.getValue()))
+                {
+                	Block[] gourds = new Block[] {Blocks.PUMPKIN, Blocks.MELON_BLOCK};
+                	IBlockState state = gourds[randomIn.nextInt(gourds.length-1)].getDefaultState();
+                	if(state.getBlock() instanceof BlockHorizontal) state = state.withProperty(BlockHorizontal.FACING, EnumFacing.HORIZONTALS[randomIn.nextInt(EnumFacing.HORIZONTALS.length-1)]);
+                	worldIn.setBlockState(blockpos, state);
+                }
+                else if("loot".equals(entry.getValue()))
+                {
+                	worldIn.setBlockState(blockpos, Blocks.CHEST.getDefaultState().withProperty(Blocks.CHEST.FACING, getCoordBaseMode().getOpposite()));
+                	//TODO storage loot
+                }
+                
+            }
+			
+			return true;
+		}
+		
+	}
+	
 }

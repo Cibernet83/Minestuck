@@ -23,6 +23,8 @@ import com.mraof.minestuck.world.lands.structure.village.ConsortVillageSalamande
 import com.mraof.minestuck.world.lands.structure.village.ConsortVillageSalamander.SmallTowerStore;
 import com.mraof.minestuck.world.lands.structure.village.ConsortVillageTurtle.LoweredShellHouse1;
 import com.mraof.minestuck.world.lands.structure.village.ConsortVillageTurtle.TurtleMarketBuilding1;
+import com.mraof.minestuck.world.lands.structure.village.ConsortVillageTurtle.TurtleProfessionalBuilding;
+import com.mraof.minestuck.world.lands.structure.village.ConsortVillageTurtle.TurtleStorage;
 import com.mraof.minestuck.world.lands.structure.village.ConsortVillageTurtle.TurtleTemple1;
 
 import net.minecraft.block.BlockHorizontal;
@@ -54,6 +56,8 @@ public class ConsortVillageComponents
 		MapGenStructureIO.registerStructureComponent(LoweredShellHouse1.class, "MinestuckCVLShH1");
 		MapGenStructureIO.registerStructureComponent(TurtleMarketBuilding1.class, "MinestuckCVTuMB1");
 		MapGenStructureIO.registerStructureComponent(TurtleTemple1.class, "MinestuckCVTuTe1");
+		MapGenStructureIO.registerStructureComponent(TurtleProfessionalBuilding.class, "MinestuckCVTuPB");
+		MapGenStructureIO.registerStructureComponent(TurtleStorage.class, "MinestuckCVTuSt");
 		
 		MapGenStructureIO.registerStructureComponent(HighNakHousing1.class, "MinestuckCVHNaH1");
 		MapGenStructureIO.registerStructureComponent(HighNakMarket1.class, "MinestuckCVHNaM1");
@@ -81,6 +85,8 @@ public class ConsortVillageComponents
 				list.add(new PieceWeight(LoweredShellHouse1.class, 3, MathHelper.getInt(random, 5, 8)));
 				list.add(new PieceWeight(TurtleMarketBuilding1.class, 10, MathHelper.getInt(random, 0, 2)));
 				list.add(new PieceWeight(TurtleTemple1.class, 10, MathHelper.getInt(random, 1, 1)));
+				list.add(new PieceWeight(TurtleProfessionalBuilding.class, 5, MathHelper.getInt(random, 1, 2)));
+				list.add(new PieceWeight(TurtleStorage.class, 10, MathHelper.getInt(random, 0, 4)));
 				break;
 			case IGUANA:
 				list.add(new PieceWeight(SmallTent1.class, 3, MathHelper.getInt(random, 5, 8)));
@@ -184,6 +190,7 @@ public class ConsortVillageComponents
 		Class <? extends ConsortVillagePiece> pieceClass = weight.villagePieceClass;
 		ConsortVillagePiece villagePiece = null;
 		
+		//Salamander
 		if (pieceClass == PipeHouse1.class)
 		{
 			villagePiece = PipeHouse1.createPiece(start, structureComponents, rand, structureMinX, structureMinY, structureMinZ, facing);
@@ -196,6 +203,7 @@ public class ConsortVillageComponents
 		{
 			villagePiece = SmallTowerStore.createPiece(start, structureComponents, rand, structureMinX, structureMinY, structureMinZ, facing);
 		}
+		//Turtle
 		else if(pieceClass == LoweredShellHouse1.class)
 		{
 			villagePiece = LoweredShellHouse1.createPiece(start, structureComponents, rand, structureMinX, structureMinY, structureMinZ, facing);
@@ -208,6 +216,11 @@ public class ConsortVillageComponents
 		{
 			villagePiece = TurtleTemple1.createPiece(start, structureComponents, rand, structureMinX, structureMinY, structureMinZ, facing);
 		}
+		else if(pieceClass == TurtleProfessionalBuilding.class)
+			villagePiece = TurtleProfessionalBuilding.createPiece(start, structureComponents, rand, structureMinX, structureMinY, structureMinZ, facing);
+		else if(pieceClass == TurtleStorage.class)
+			villagePiece = TurtleStorage.createPiece(start, structureComponents, rand, structureMinX, structureMinY, structureMinZ, facing);
+		//Nakagator
 		else if(pieceClass == HighNakHousing1.class)
 		{
 			villagePiece = HighNakHousing1.createPiece(start, structureComponents, rand, structureMinX, structureMinY, structureMinZ, facing);
@@ -220,6 +233,7 @@ public class ConsortVillageComponents
 		{
 			villagePiece = HighNakInn1.createPiece(start, structureComponents, rand, structureMinX, structureMinY, structureMinZ, facing);
 		}
+		//Iguana
 		else if(pieceClass == SmallTent1.class)
 		{
 			villagePiece = SmallTent1.createPiece(start, structureComponents, rand, structureMinX, structureMinY, structureMinZ, facing);
@@ -424,13 +438,6 @@ public class ConsortVillageComponents
 		
 		protected boolean spawnConsort(BlockPos pos, StructureBoundingBox boundingBox, World world, EnumConsort.MerchantType type, int maxHomeDistance)
 		{
-			
-			if(type != MerchantType.NONE)
-			{
-				System.out.println("shopkeeper  pos:");
-				System.out.println(pos);
-			}
-			
 			if(boundingBox.isVecInside(pos))
 			{
 				LandAspectRegistry.AspectCombination aspects = MinestuckDimensionHandler.getAspects(world.provider.getDimension());
@@ -460,7 +467,6 @@ public class ConsortVillageComponents
 					e.printStackTrace();
 				}
 			}
-			Debug.warn("tried to spawn a consort outside of a boundingbox");
 			return false;
 		}
 	}
