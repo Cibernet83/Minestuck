@@ -71,13 +71,13 @@ public class ConsortVillageTurtle
 					return true;
 				}
 				
-				this.boundingBox.offset(0, this.averageGroundLvl - this.boundingBox.minY - 5, 0);
+				this.boundingBox.offset(0, this.averageGroundLvl - this.boundingBox.minY - 1, 0);
 			}
 			
 			ChunkProviderLands provider = (ChunkProviderLands) worldIn.provider.createChunkGenerator();
 			String terrain = MinestuckDimensionHandler.getAspects(worldIn.provider.getDimension()).aspectTerrain.getPrimaryName();
 			String[] pieces = new String[] {"well", "park"};
-			String piece = pieces[randomIn.nextInt(pieces.length-1)];
+			String piece = pieces[randomIn.nextInt(pieces.length)];
 			Template template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/"+terrain+"/"+piece));
 			if(template == null) template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/default/"+piece));
 			
@@ -332,7 +332,7 @@ public class ConsortVillageTurtle
 			ChunkProviderLands provider = (ChunkProviderLands) worldIn.provider.createChunkGenerator();
 			String terrain = MinestuckDimensionHandler.getAspects(worldIn.provider.getDimension()).aspectTerrain.getPrimaryName();
 			String[] buildings = new String[] {"inn","smith","library", "farm"};
-			String building = buildings[randomIn.nextInt(buildings.length-1)];
+			String building = buildings[randomIn.nextInt(buildings.length)];
 			Template template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/"+terrain+"/"+building));
 			if(template == null) template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/default/"+building));
 			
@@ -349,7 +349,7 @@ public class ConsortVillageTurtle
                 if ("loot".equals(entry.getValue()))
                 {
                 	//TODO custom loot
-                	StructureBlockUtil.placeLootChest(blockpos, worldIn, structureBoundingBoxIn, getCoordBaseMode().getOpposite(), MinestuckLoot.BASIC_MEDIUM_CHEST, randomIn);
+                	worldIn.setBlockState(blockpos, Blocks.CHEST.getDefaultState().withProperty(Blocks.CHEST.FACING, getCoordBaseMode().getOpposite()));
                 }
                 else if("innkeeper".equals(entry.getValue()))
                 {
@@ -362,9 +362,12 @@ public class ConsortVillageTurtle
                 	worldIn.setBlockState(blockpos, Blocks.FARMLAND.getDefaultState());
                 	
                 	Block[] crops = new Block[] {Blocks.WHEAT,Blocks.CARROTS,Blocks.BEETROOTS,Blocks.POTATOES};
-                	IBlockState state = crops[randomIn.nextInt(crops.length-1)].getDefaultState();
+                	IBlockState state = crops[randomIn.nextInt(crops.length)].getDefaultState();
+                	/*
+                	 * TODO random crop age
                 	if(state.getBlock() instanceof BlockCrops)
-                		state = state.withProperty(((BlockCrops)state.getBlock()).AGE, randomIn.nextInt(((BlockCrops)state.getBlock()).getMaxAge()));
+                		state = state.withProperty(((BlockCrops)state.getBlock()).AGE, randomIn.nextInt(((BlockCrops)state.getBlock()).getMaxAge()-1));
+                		*/
                 	worldIn.setBlockState(blockpos.up(), state);
                 }
                 
@@ -429,14 +432,14 @@ public class ConsortVillageTurtle
                 if ("gourd".equals(entry.getValue()))
                 {
                 	Block[] gourds = new Block[] {Blocks.PUMPKIN, Blocks.MELON_BLOCK};
-                	IBlockState state = gourds[randomIn.nextInt(gourds.length-1)].getDefaultState();
-                	if(state.getBlock() instanceof BlockHorizontal) state = state.withProperty(BlockHorizontal.FACING, EnumFacing.HORIZONTALS[randomIn.nextInt(EnumFacing.HORIZONTALS.length-1)]);
+                	IBlockState state = gourds[randomIn.nextInt(gourds.length)].getDefaultState();
+                	if(state.getBlock() instanceof BlockHorizontal) state = state.withProperty(BlockHorizontal.FACING, EnumFacing.HORIZONTALS[randomIn.nextInt(EnumFacing.HORIZONTALS.length)]);
                 	worldIn.setBlockState(blockpos, state);
                 }
                 else if("loot".equals(entry.getValue()))
                 {
-                	worldIn.setBlockState(blockpos, Blocks.CHEST.getDefaultState().withProperty(Blocks.CHEST.FACING, getCoordBaseMode().getOpposite()));
                 	//TODO storage loot
+                	StructureBlockUtil.placeLootChest(blockpos, worldIn, structureBoundingBoxIn, getCoordBaseMode().getOpposite(), MinestuckLoot.BASIC_MEDIUM_CHEST, randomIn);
                 }
                 
             }
