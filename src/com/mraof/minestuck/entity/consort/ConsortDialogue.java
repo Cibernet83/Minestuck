@@ -413,7 +413,8 @@ public class ConsortDialogue
 		addMessage(new SingleMessage("innPlasticBeds")).type(MerchantType.INNKEEPER);
 		addMessage(new SingleMessage("innKeeper")).type(MerchantType.INNKEEPER);
 		addMessage(new SingleMessage("innTertainer")).type(MerchantType.INNKEEPER);
-		addMessage(new SingleMessage("innLowPrices")).type(MerchantType.INNKEEPER);
+		addMessage(new SingleMessage("innCrediblePrices")).type(MerchantType.INNKEEPER);
+		addMessage(new SingleMessage("innRest")).type(MerchantType.INNKEEPER);
 		
 	}
 	
