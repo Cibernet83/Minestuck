@@ -1,6 +1,10 @@
 package com.mraof.minestuck.command;
 
+import java.util.List;
+
 import com.mraof.minestuck.world.WorldProviderLands;
+
+import joptsimple.ArgumentAcceptingOptionSpec;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -53,7 +57,21 @@ public class CommandToStructure extends CommandBase
 			BlockPos location = ((WorldProviderLands) playerMP.world.provider).findAndMarkNextStructure(playerMP, args[0], playerMP.getEntityData().getCompoundTag(EntityPlayer.PERSISTED_NBT_TAG).getTagList("commandVisitedStructures", 4));
 			if(location != null)
 				playerMP.setPositionAndUpdate(location.getX(), location.getY(), location.getZ());
-			else throw new CommandException("A problem occured");
+			else if(WorldProviderLands.getStructureNamesList().contains(args[0].toLowerCase()))
+				throw new CommandException("Could not find a" + (args[0].toLowerCase().charAt(0) == 'a' ? "n " : " ") + args[0].toLowerCase() + " structure, try to generate some chunks by walking around.");
+			else	throw new CommandException(args[0].toLowerCase()  + " is either an invalid structure or currently unsupported by this command.");
+				
+			
 		}
+	}
+	
+	@Override
+	public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args,
+			BlockPos targetPos) 
+	{
+		if(args.length == 1)
+			return WorldProviderLands.getStructureNamesList();
+		else
+		return super.getTabCompletions(server, sender, args, targetPos);
 	}
 }

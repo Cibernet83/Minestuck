@@ -1,5 +1,7 @@
 package com.mraof.minestuck.world;
 
+import java.util.List;
+
 import com.mraof.minestuck.client.renderer.LandSkyRender;
 import com.mraof.minestuck.network.skaianet.SburbConnection;
 import com.mraof.minestuck.network.skaianet.SkaianetHandler;
@@ -20,6 +22,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.IChunkGenerator;
+import scala.actors.threadpool.Arrays;
 
 public class WorldProviderLands extends WorldProvider
 {
@@ -238,6 +241,14 @@ public class WorldProviderLands extends WorldProvider
 			return chunkProvider.villageHandler.findAndMarkNextVillage(player, type, tags);
 		Debug.warnf("Couldn't identify %s", type);
 		return null;
+	}
+	
+	public static List<String> getStructureNamesList()
+	{
+		return Arrays.asList(new String[] 
+		{
+			"village",	
+		});
 	}
 	
 	public void mergeFogColor(Vec3d fogColor, float strength)
