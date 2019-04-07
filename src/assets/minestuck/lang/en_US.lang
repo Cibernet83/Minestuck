@@ -606,6 +606,9 @@ store.tile.cactus.tooltip=It's the quenchiest!
 #Stone Tablet Predifines
 tablet.shining=All work and no play makes Sean a dull consort. All work and no play makes Sean a dull consort. All work and no play makes Sean a dull consort. All work and no play makes Sean a dull consort. All work and no play makes Sean a dull consort.
 tablet.determined=*Finding a medium worthy of your writings fills you with determination.
+tablet.hidden=I've hidden this tablet in a place that nobody can find! If you're reading this, you are a fantastic detective!
+tablet.idea=Idea: milk, but wetter. How? Add water, or something...
+tablet.groceries=Potatoes, bread, milk, water, cookies, gushers
 
 #Denizen Names
 denizen.blood.name=Jormungandr

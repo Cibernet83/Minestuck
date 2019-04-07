@@ -21,6 +21,9 @@ public class SetTabletText extends LootFunction
 	{
 		"shining",
 		"determined",
+		"hidden",
+		"idea",
+		"groceries",
 	};
 	
 	protected SetTabletText(LootCondition[] conditionsIn) {super(conditionsIn);}
