@@ -4,18 +4,19 @@ import com.mraof.minestuck.inventory.ContainerConsortMerchant;
 import com.mraof.minestuck.inventory.ContainerCrockerMachine;
 import com.mraof.minestuck.inventory.ContainerSburbMachine;
 import com.mraof.minestuck.inventory.ContainerUraniumCooker;
+import com.mraof.minestuck.item.MinestuckItems;
 import com.mraof.minestuck.tileentity.TileEntityAlchemiter;
 import com.mraof.minestuck.tileentity.TileEntityComputer;
 import com.mraof.minestuck.tileentity.TileEntityCrockerMachine;
-import com.mraof.minestuck.tileentity.TileEntityCruxtruder;
 import com.mraof.minestuck.tileentity.TileEntitySburbMachine;
-import com.mraof.minestuck.tileentity.TileEntityTotemLathe;
 import com.mraof.minestuck.tileentity.TileEntityTransportalizer;
 import com.mraof.minestuck.tileentity.TileEntityUraniumCooker;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.IGuiHandler;
@@ -30,6 +31,8 @@ public class GuiHandler implements IGuiHandler
 		COLOR,
 		MERCHANT,
 		ALCHEMITER,
+		STRIFE_CARD,
+		STONE_TABLET,
 	}
 	
 	@Override
@@ -77,6 +80,28 @@ public class GuiHandler implements IGuiHandler
 		
 		if(tileEntity instanceof TileEntityAlchemiter && id == GuiId.ALCHEMITER.ordinal())
 			return new GuiAlchemiter((TileEntityAlchemiter) tileEntity);
+		
+		if(id == GuiId.STONE_TABLET.ordinal())
+		{
+			EnumHand hand = EnumHand.OFF_HAND;
+			ItemStack stack = player.getHeldItemMainhand();
+			ItemStack tablet = new ItemStack(MinestuckItems.stoneSlab);
+			String text = "";
+			if(!stack.isItemEqual(tablet)) 
+			{
+				hand = EnumHand.MAIN_HAND;
+				if(!(stack = player.getHeldItemOffhand()).isItemEqual(tablet)) 
+					return null;
+			}
+			
+			if(stack.hasTagCompound())
+			{
+				text = stack.getTagCompound().getString("text");
+			}
+			
+			boolean canEdit = player.getHeldItem(hand).isItemEqual(new ItemStack(MinestuckItems.carvingTool));
+			return new GuiStoneTablet(player, player.getHeldItemMainhand(), text, canEdit);
+		}
 		
 		return null;
 		

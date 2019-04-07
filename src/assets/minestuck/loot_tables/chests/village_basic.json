@@ -1,0 +1,21 @@
+{
+    "pools": [
+        {
+            "name": "main",
+            "rolls": 1,
+            "entries": [
+                {
+                    "type": "item",
+                    "name": "minestuck:stone_slab",
+                    "weight": 1,
+                    "quality": 2,
+                    "functions": [
+                        {
+                            "function": "minestuck:set_tablet_text"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

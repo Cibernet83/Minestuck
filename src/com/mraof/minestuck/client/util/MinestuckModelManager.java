@@ -239,7 +239,8 @@ public class MinestuckModelManager
 		register(crumplyHat);
 		register(frogStatueReplica);
 		register(stoneEyeballs);
-		register(stoneSlab);
+		ModelLoader.registerItemVariants(stoneSlab, new ResourceLocation("minestuck:stone_slab"), new ResourceLocation("minestuck:stone_slab_written"));
+		ModelLoader.setCustomMeshDefinition(stoneSlab, new StoneSlabDefinition());
 		register(recordEmissaryOfDance);
 		register(recordDanceStab);
 		register(recordRetroBattle);
@@ -519,7 +520,21 @@ public class MinestuckModelManager
 			return new ModelResourceLocation("minestuck:" + str, "inventory");
 		}
 	}
-
+	
+	private static class StoneSlabDefinition implements ItemMeshDefinition
+	{
+		@Override
+		public ModelResourceLocation getModelLocation(ItemStack stack)
+		{
+			NBTTagCompound nbt = stack.getTagCompound();
+			String str = "stone_slab";
+			if(nbt != null && nbt.hasKey("text") && nbt.getString("text") != "")
+				str += "_written";
+				
+			return new ModelResourceLocation("minestuck:" + str, "inventory");
+		}
+	}
+	
 	private static class ShuntDefinition implements ItemMeshDefinition
 	{
 		@Override

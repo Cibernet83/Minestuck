@@ -349,7 +349,7 @@ public class ConsortVillageTurtle
                 if ("loot".equals(entry.getValue()))
                 {
                 	//TODO custom loot
-                	worldIn.setBlockState(blockpos, Blocks.CHEST.getDefaultState().withProperty(Blocks.CHEST.FACING, getCoordBaseMode().getOpposite()));
+                	StructureBlockUtil.placeLootChest(blockpos, worldIn, structureBoundingBoxIn, getCoordBaseMode().getOpposite(), MinestuckLoot.VILLAGE_BASIC_CHEST, randomIn);
                 }
                 else if("innkeeper".equals(entry.getValue()))
                 {
@@ -439,7 +439,7 @@ public class ConsortVillageTurtle
                 else if("loot".equals(entry.getValue()))
                 {
                 	//TODO storage loot
-                	StructureBlockUtil.placeLootChest(blockpos, worldIn, structureBoundingBoxIn, getCoordBaseMode().getOpposite(), MinestuckLoot.BASIC_MEDIUM_CHEST, randomIn);
+                	StructureBlockUtil.placeLootChest(blockpos, worldIn, structureBoundingBoxIn, getCoordBaseMode().getOpposite(), MinestuckLoot.VILLAGE_BASIC_CHEST, randomIn);
                 }
                 
             }

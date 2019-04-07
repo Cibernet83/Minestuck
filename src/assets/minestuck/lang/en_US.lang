@@ -603,6 +603,10 @@ store.tile.appleCake.tooltip=Cakes are truly the best when made with apples!
 store.tile.glowingMushroom.tooltip=This mushroom tastes a bit better than any other around here, according to myself!
 store.tile.cactus.tooltip=It's the quenchiest!
 
+#Stone Tablet Predifines
+tablet.shining=All work and no play makes Sean a dull consort. All work and no play makes Sean a dull consort. All work and no play makes Sean a dull consort. All work and no play makes Sean a dull consort. All work and no play makes Sean a dull consort.
+tablet.determined=*Finding a medium worthy of your writings fills you with determination.
+
 #Denizen Names
 denizen.blood.name=Jormungandr
 denizen.breath.name=Typheus
@@ -1002,7 +1006,8 @@ item.carvingTool.name=Carving Tool
 item.crumplyHat.name=Crumply Hat
 tile.frogStatueReplica.name=Frog Statue Replica
 item.stoneEyeballs.name=Stone Eyeballs
-item.stoneSlab.name=Stone Slab
+item.stoneSlab.name=Stone Tablet
+item.stoneSlab.carved=It appears to have something engraved in it!
 item.glowystoneDust.name=Glowystone Dust
 item.record.emissary.desc=Catboss - Emissary of Dance
 item.record.danceStab.desc=Catboss - Dance-Stab-Dance

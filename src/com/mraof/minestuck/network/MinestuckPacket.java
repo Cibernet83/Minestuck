@@ -30,7 +30,10 @@ public abstract class MinestuckPacket
 		INVENTORY(InventoryChangedPacket.class),
 		CAPTCHA(CaptchaDeckPacket.class),
 		SELECTION(SelectionPacket.class),
-		DATA_CHECKER(DataCheckerPacket.class);
+		DATA_CHECKER(DataCheckerPacket.class),
+		
+		STONE_TABLET(StoneTabletPacket.class),
+		;
 		
 		Class<? extends MinestuckPacket> packetType;
 		private Type(Class<? extends MinestuckPacket> packetClass)
