@@ -1,21 +1,26 @@
 package com.mraof.minestuck.world;
 
-import com.mraof.minestuck.Minestuck;
-import com.mraof.minestuck.MinestuckConfig;
-import com.mraof.minestuck.network.LandRegisterPacket;
-import com.mraof.minestuck.util.Debug;
-import com.mraof.minestuck.world.lands.LandAspectRegistry;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.DimensionType;
-import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.fml.common.FMLLog;
+import static net.minecraft.client.resources.I18n.format;
 
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import com.mraof.minestuck.Minestuck;
+import com.mraof.minestuck.MinestuckConfig;
+import com.mraof.minestuck.network.LandRegisterPacket;
+import com.mraof.minestuck.util.Debug;
+import com.mraof.minestuck.world.lands.LandAspectRegistry;
+import com.mraof.minestuck.world.lands.gen.ChunkProviderLands;
+
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.DimensionType;
+import net.minecraft.world.World;
+import net.minecraftforge.common.DimensionManager;
 
 public class MinestuckDimensionHandler
 {
@@ -144,6 +149,31 @@ public class MinestuckDimensionHandler
 		}
 		
 		return aspects;
+	}
+	
+	public static String getLandName(World world)
+	{
+		
+		ChunkProviderLands chunkProvider = (ChunkProviderLands) world.provider.createChunkGenerator();
+		String aspect1 = I18n.translateToLocal(getLandTitleName(world));
+		String aspect2 = I18n.translateToLocal(getLandTerrainName(world));
+		if(chunkProvider.nameOrder)
+			return format("land.format", aspect1, aspect2);
+		else
+			return format("land.format", aspect2, aspect1);
+		
+	}
+	
+	public static String getLandTitleName(World worldIn)
+	{
+		ChunkProviderLands chunkProvider = (ChunkProviderLands) worldIn.provider.createChunkGenerator();
+		return "land." + chunkProvider.aspect1.getNames()[chunkProvider.nameIndex1];
+	}
+	
+	public static String getLandTerrainName(World worldIn)
+	{
+		ChunkProviderLands chunkProvider = (ChunkProviderLands) worldIn.provider.createChunkGenerator();
+		return "land." + chunkProvider.aspect2.getNames()[chunkProvider.nameIndex2];
 	}
 	
 	public static boolean isLandDimension(int dimensionId)
