@@ -132,7 +132,7 @@ public class ConsortVillageTurtle
 			
 			ChunkProviderLands provider = (ChunkProviderLands) worldIn.provider.createChunkGenerator();
 			String terrain = MinestuckDimensionHandler.getAspects(worldIn.provider.getDimension()).aspectTerrain.getPrimaryName();
-			Template template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/"+terrain+"/house"));
+			Template template = StructureBlockUtil.getStructureTemplate(worldIn, new ResourceLocation(Minestuck.MOD_ID, "village/turtle/"+terrain+"/house"));
 			if(template == null) template = worldIn.getSaveHandler().getStructureTemplateManager().getTemplate(worldIn.getMinecraftServer(), new ResourceLocation(Minestuck.MOD_ID, "village/turtle/default/house"));
 			
 			PlacementSettings settings = new PlacementSettings().setBoundingBox(structureBoundingBoxIn).setRotation(getTemplateRotation());

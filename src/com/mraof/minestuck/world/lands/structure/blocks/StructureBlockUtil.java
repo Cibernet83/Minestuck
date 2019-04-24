@@ -1,9 +1,12 @@
 package com.mraof.minestuck.world.lands.structure.blocks;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Random;
 
+import com.mraof.minestuck.Minestuck;
 import com.mraof.minestuck.world.lands.gen.ChunkProviderLands;
 
 import net.minecraft.block.BlockChest;
@@ -29,13 +32,17 @@ import net.minecraft.world.gen.structure.template.TemplateManager;
 public class StructureBlockUtil
 {
 	
-	public Template getStructureTemplate(World worldIn, ResourceLocation templateLoc)
+	public static Template getStructureTemplate(World worldIn, ResourceLocation templateLoc)
 	{
 		TemplateManager manager = worldIn.getSaveHandler().getStructureTemplateManager();
 		Template template = manager.getTemplate(worldIn.getMinecraftServer(), templateLoc);
+		
+		
+		
 		try 
 		{
-			InputStream stream = Minecraft.getMinecraft().getResourceManager().getResource(templateLoc).getInputStream();
+			InputStream stream = Minestuck.instance.getClass().getClassLoader()
+				      .getResourceAsStream("assets/"+templateLoc.getResourceDomain()+"/structures/"+templateLoc.getResourcePath());
 			NBTTagCompound nbt = CompressedStreamTools.readCompressed(stream);
 			NBTTagList list = (NBTTagList) nbt.getTagList("palette", 10);
 			NBTTagList list2 = new NBTTagList();
@@ -43,9 +50,13 @@ public class StructureBlockUtil
 			for(int i = 0; i < list.tagCount(); i++)
 			{
 				String name = list.getCompoundTagAt(i).getString("Name");
+				System.out.println(name);
 				IBlockState state = ((ChunkProviderLands) worldIn.provider.createChunkGenerator()).blockRegistry.getBlockState(name);
 				if(state != null) 
+				{	
+					System.out.println("valid!");
 					list2.appendTag(NBTUtil.writeBlockState(new NBTTagCompound(), state));
+				}
 				else list2.appendTag(list.getCompoundTagAt(i));
 			}
 			
