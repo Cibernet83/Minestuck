@@ -70,7 +70,7 @@ public class GateHandler
 			{
 				SburbConnection clientConnection = SkaianetHandler.get(player.world).getMainConnection(landConnection.getClientIdentifier(), false);
 				
-				if(clientConnection != null && clientConnection.enteredGame() && MinestuckDimensionHandler.isLandDimension(clientConnection.getClientDimension()))
+				if(clientConnection != null && clientConnection.hasEntered() && MinestuckDimensionHandler.isLandDimension(clientConnection.getClientDimension()))
 				{
 					DimensionType clientDim = clientConnection.getClientDimension();
 					BlockPos gatePos = getGatePos(player.server, -1, clientDim);
@@ -85,10 +85,10 @@ public class GateHandler
 					
 					if(gatePos.getY() == -1)
 					{
-						world.getChunkProvider().provideChunk(gatePos.getX() - 8 >> 4, gatePos.getZ() - 8 >> 4, true, true);
-						world.getChunkProvider().provideChunk(gatePos.getX() + 8 >> 4, gatePos.getZ() - 8 >> 4, true, true);
-						world.getChunkProvider().provideChunk(gatePos.getX() - 8 >> 4, gatePos.getZ() + 8 >> 4, true, true);
-						world.getChunkProvider().provideChunk(gatePos.getX() + 8 >> 4, gatePos.getZ() + 8 >> 4, true, true);
+						world.getChunkProvider().getChunk(gatePos.getX() - 8 >> 4, gatePos.getZ() - 8 >> 4, true, true);
+						world.getChunkProvider().getChunk(gatePos.getX() + 8 >> 4, gatePos.getZ() - 8 >> 4, true, true);
+						world.getChunkProvider().getChunk(gatePos.getX() - 8 >> 4, gatePos.getZ() + 8 >> 4, true, true);
+						world.getChunkProvider().getChunk(gatePos.getX() + 8 >> 4, gatePos.getZ() + 8 >> 4, true, true);
 						gatePos = getGatePos(player.server, -1, clientDim);
 						if(gatePos.getY() == -1) {Debug.errorf("Unexpected error: Gate didn't generate after loading chunks! Dim: %d, pos: %s", clientDim, gatePos); return;}
 					}
@@ -104,7 +104,7 @@ public class GateHandler
 			{
 				SburbConnection serverConnection = SkaianetHandler.get(player.world).getMainConnection(landConnection.getServerIdentifier(), true);
 				
-				if(serverConnection != null && serverConnection.enteredGame() && MinestuckDimensionHandler.isLandDimension(serverConnection.getClientDimension()))	//Last shouldn't be necessary, but just in case something goes wrong elsewhere...
+				if(serverConnection != null && serverConnection.hasEntered() && MinestuckDimensionHandler.isLandDimension(serverConnection.getClientDimension()))	//Last shouldn't be necessary, but just in case something goes wrong elsewhere...
 				{
 					DimensionType serverDim = serverConnection.getClientDimension();
 					location = new Location(getGatePos(player.server, 2, serverDim), serverDim);
@@ -153,14 +153,14 @@ public class GateHandler
 				int z = (int) Math.sqrt(distance*(1-d));
 				
 				BlockPos pos = new BlockPos(spawn.getX() + x, -1, spawn.getZ() + z);
-				
-				if(/*!world.getChunkProvider().chunkExists(pos.getX() >> 4, pos.getZ() >> 4) &&*/ Lists.newArrayList(BiomeMinestuck.mediumNormal).containsAll(world.getChunkProvider().getChunkGenerator().getBiomeProvider().getBiomesInSquare(pos.getX(), pos.getZ(), Math.max(20, 50 - tries))))
+				//TODO When we have biomes again
+				//if(/*!world.getChunkProvider().chunkExists(pos.getX() >> 4, pos.getZ() >> 4) &&*/ Lists.newArrayList(BiomeMinestuck.mediumNormal).containsAll(world.getChunkProvider().getChunkGenerator().getBiomeProvider().getBiomesInSquare(pos.getX(), pos.getZ(), Math.max(20, 50 - tries))))
 					gatePos = pos;
 				
 				tries++;
 			} while(gatePos == null);	//TODO replace with a more friendly version without a chance of freezing the game
 			
-			Debug.infof("Land gate will generate at %d %d in dimension %d.", gatePos.getX(), gatePos.getZ(), dim);
+			Debug.infof("Land gate will generate at %d %d in dimension %s.", gatePos.getX(), gatePos.getZ(), dim.getRegistryName());
 			gateData.put(dim, gatePos);
 		}
 	}
@@ -214,9 +214,9 @@ public class GateHandler
 				if(gateData.containsKey(dim))
 				{
 					BlockPos gatePos = gateData.get(dim);
-					nbt.setInt("gateX", gatePos.getX());
-					nbt.setInt("gateY", gatePos.getY());
-					nbt.setInt("gateZ", gatePos.getZ());
+					nbt.putInt("gateX", gatePos.getX());
+					nbt.putInt("gateY", gatePos.getY());
+					nbt.putInt("gateZ", gatePos.getZ());
 				}
 			}
 		}
@@ -227,9 +227,9 @@ public class GateHandler
 		for(int i = 0; i < nbtList.size(); i++)
 		{
 			NBTTagCompound nbt = nbtList.getCompound(i);
-			if(nbt.getString("type").equals("land") && nbt.hasKey("gateX"))
+			if(nbt.getString("type").equals("land") && nbt.contains("gateX"))
 			{
-				DimensionType dim = DimensionType.byName(ResourceLocation.makeResourceLocation(nbt.getString("dim")));
+				DimensionType dim = DimensionType.byName(ResourceLocation.tryCreate(nbt.getString("dim")));
 				if(dim != null)
 				{
 					BlockPos pos = new BlockPos(nbt.getInt("gateX"), nbt.getInt("gateY"), nbt.getInt("gateZ"));

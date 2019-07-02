@@ -35,10 +35,10 @@ public abstract class GuiPlayerStats extends GuiScreenMinestuck
 	public enum NormalGuiType
 	{
 		
-		CAPTCHA_DECK(GuiCaptchaDeck.class, "gui.captchaDeck.name", true, false),
-		STRIFE_SPECIBUS(GuiStrifeSpecibus.class, "gui.strifeSpecibus.name", false, false),
+		CAPTCHA_DECK(GuiCaptchaDeck.class, "gui.captcha_deck.name", true, false),
+		STRIFE_SPECIBUS(GuiStrifeSpecibus.class, "gui.strife_specibus.name", false, false),
 		ECHELADDER(GuiEcheladder.class, "gui.echeladder.name", false, true),
-		GRIST_CACHE(GuiGristCache.class, "gui.gristCache.name", false, true);
+		GRIST_CACHE(GuiGristCache.class, "gui.grist_cache.name", false, true);
 		
 		final Class<? extends GuiScreen> guiClass;
 		final String name;
@@ -236,7 +236,7 @@ public abstract class GuiPlayerStats extends GuiScreenMinestuck
 				{
 					if(mode && NormalGuiType.values()[i].reqMedium() && !SkaiaClient.enteredMedium(SkaiaClient.playerId) && mc.playerController.isNotCreative())
 						return true;
-					mc.getSoundHandler().play(SimpleSound.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+					mc.getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 					if(i != (mode? normalTab:editmodeTab).ordinal())
 					{
 						if(mode)

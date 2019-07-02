@@ -1,18 +1,25 @@
 package com.mraof.minestuck.world.lands;
 
+import com.mraof.minestuck.Minestuck;
 import com.mraof.minestuck.MinestuckConfig;
 import com.mraof.minestuck.network.skaianet.SkaianetHandler;
 import com.mraof.minestuck.tracker.MinestuckPlayerTracker;
 import com.mraof.minestuck.util.Debug;
 import com.mraof.minestuck.util.EnumAspect;
+import com.mraof.minestuck.util.IdentifierHandler;
 import com.mraof.minestuck.util.Teleport;
 import com.mraof.minestuck.world.MinestuckDimensionHandler;
 import com.mraof.minestuck.world.lands.terrain.*;
 import com.mraof.minestuck.world.lands.title.*;
+import io.netty.buffer.Unpooled;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.DimensionManager;
 
@@ -210,25 +217,47 @@ public class LandAspectRegistry
 	 */
 	public static NBTTagCompound toNBT(TerrainLandAspect aspect1, TitleLandAspect aspect2) {
 		NBTTagCompound tag = new NBTTagCompound();
-		tag.setString("aspect1",aspect1.getPrimaryName());
-		tag.setString("aspect2",aspect2.getPrimaryName());
+		tag.putString("aspect1",aspect1.getPrimaryName());
+		tag.putString("aspect2",aspect2.getPrimaryName());
 		return tag;
 	}
 	
-	/**
-	 * Gets a land aspect from it's primary name. Used in loading from NBT.
-	 */
-	public static TerrainLandAspect fromNameTerrain(String name) {
-		return (TerrainLandAspect)landNames.get(name);
-		
+	public static TerrainLandAspect fromNameTerrain(String name)
+	{
+		return fromNameTerrain(name, true);
 	}
 	
 	/**
 	 * Gets a land aspect from it's primary name. Used in loading from NBT.
 	 */
+	public static TerrainLandAspect fromNameTerrain(String name, boolean acceptNull)
+	{
+		TerrainLandAspect aspect = landNames.get(name);
+		if(aspect == null && !acceptNull)
+		{
+			Debug.errorf("Could not find terrain landspect %s!", name);
+			return landAspects.get(0);
+		}
+		return aspect;
+	}
+	
 	public static TitleLandAspect fromNameTitle(String name)
 	{
-		return landNames2.get(name);
+		return fromNameTitle(name, true);
+	}
+	
+	/**
+	 * Gets a land aspect from it's primary name. Used in loading from NBT.
+	 */
+	public static TitleLandAspect fromNameTitle(String name, boolean acceptNull)
+	{
+		TitleLandAspect aspect = landNames2.get(name);
+		if(aspect == null && !acceptNull)
+		{
+			Debug.errorf("Could not find title landspect %s!", name);
+			return nullAspect;
+		}
+		return aspect;
 	}
 	
 	public static Collection<String> getNamesTerrain()
@@ -254,42 +283,35 @@ public class LandAspectRegistry
 	}
 	
 	/**
-	 * Registers a new dimension for a land. Returns the ID of the nearest open land ID.
+	 * Registers a new dimension for a land. Returns the type of the new land.
 	 * @param player The player whose Land is being created
-	 * @param teleport The teleporter in charge of carrying the player into the Land.
-	 * If this value is null, the Land will be created, and the player will be left behind.
-	 * <code>ItemCruxiteArtifact</code> is the recommended teleporter for Entry.
-	 * @return Returns the dimension of the player's Land, or -1 if Entry fails.
+	 * @param aspects Land aspects that the land should have
+	 * @return Returns the dimension of the newly created land.
 	 */
-	public static DimensionType createLand(EntityPlayer player, Teleport.ITeleporter teleport)
+	public static DimensionType createLand(MinecraftServer server, IdentifierHandler.PlayerIdentifier player, LandAspects aspects)
 	{
 		
-		/*int newLandId = MinestuckDimensionHandler.landDimensionIdStart;
-		
-		while (true)
+		if(MinestuckDimensionHandler.landCache.isEmpty())
 		{
-			if (!DimensionManager.isDimensionRegistered(newLandId))
-			{
-				break;
-			}
-			else
-			{
-				newLandId++;
-			}
+			Debug.warnf("Minestuck is out of cached land dimensions. You have to increase the cache size in the config and restart!");
+			return null;
 		}
 		
-		int id = SkaianetHandler.enterMedium((EntityPlayerMP)player, newLandId, teleport);
+		DimensionType land = MinestuckDimensionHandler.landCache.remove(0);
+		PacketBuffer data = land.getData();
+		data.clear();
+		data.writeBoolean(true);
+		data.writeString(aspects.aspectTerrain.getPrimaryName());
+		data.writeString(aspects.aspectTitle.getPrimaryName());
+		World world = DimensionManager.getWorld(server, land, true, false);
 		
-		if(id == -1)
-			return -1;	//Something happened at skaianet preventing the Land from being made
+		if(world != null)
+		{
+			((LandDimension) world.dimension).landAspects = aspects;
+			((LandDimension) world.dimension).initLandAspects();
+		}
 		
-		if(id != newLandId)			//This happens iff the player has a "home dimension" Land already registered
-			newLandId = id;
-		
-		MinestuckPlayerTracker.updateLands();
-		
-		return newLandId;*/
-		return null;
+		return land;
 	}
 	
 	/**

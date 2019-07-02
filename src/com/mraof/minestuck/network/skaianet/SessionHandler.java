@@ -1,28 +1,19 @@
 package com.mraof.minestuck.network.skaianet;
 
-import com.google.common.collect.Lists;
 import com.mraof.minestuck.MinestuckConfig;
-import com.mraof.minestuck.tracker.MinestuckPlayerTracker;
 import com.mraof.minestuck.util.Debug;
 import com.mraof.minestuck.util.IdentifierHandler;
 import com.mraof.minestuck.util.IdentifierHandler.PlayerIdentifier;
-import com.mraof.minestuck.util.MinestuckPlayerData;
+import com.mraof.minestuck.world.storage.PlayerSavedData;
 import com.mraof.minestuck.util.Title;
 import com.mraof.minestuck.world.MinestuckDimensionHandler;
-import com.mraof.minestuck.world.lands.LandAspectRegistry;
 import com.mraof.minestuck.world.lands.LandAspects;
 import com.mraof.minestuck.world.lands.gen.ChunkProviderLands;
-import net.minecraft.command.CommandException;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.IChunkGenerator;
-import net.minecraftforge.common.DimensionManager;
 
 import java.util.*;
 
@@ -65,13 +56,6 @@ public class SessionHandler
 		} else
 		{
 			mergeAll();
-			if(sessions.size() == 0)
-			{
-				Session mainSession = new Session();
-				mainSession.name = GLOBAL_SESSION_NAME;
-				sessions.add(mainSession);
-				sessionsByName.put(mainSession.name, mainSession);
-			}
 		}
 	}
 	
@@ -80,13 +64,21 @@ public class SessionHandler
 	 * Used in the conversion of a non-global session world
 	 * to a global session world.
 	 */
-	private static void mergeAll()
+	static void mergeAll()
 	{
-		if(!canMergeAll() || sessions.size() == 0)
+		if(sessions.size() == 0 ||!canMergeAll())
 		{
 			singleSession = sessions.size() == 0;
 			if(!singleSession)
 				Debug.warn("Not allowed to merge all sessions together! Global session temporarily disabled for this time.");
+			else
+			{
+				Session mainSession = new Session();
+				mainSession.name = GLOBAL_SESSION_NAME;
+				sessions.add(mainSession);
+				sessionsByName.put(mainSession.name, mainSession);
+			}
+			
 			return;
 		}
 		
@@ -587,7 +579,7 @@ public class SessionHandler
 	{
 		NBTTagCompound nbt = new NBTTagCompound();
 		NBTTagList sessionList = new NBTTagList();
-		nbt.setTag("sessions", sessionList);
+		nbt.put("sessions", sessionList);
 		for(int i = 0; i < sessions.size(); i++)
 		{
 			Session session = sessions.get(i);
@@ -598,50 +590,49 @@ public class SessionHandler
 				if(c.isMain)
 					playerSet.add(c.getClientIdentifier());
 				NBTTagCompound connectionTag = new NBTTagCompound();
-				connectionTag.setString("client", c.getClientIdentifier().getUsername());
-				connectionTag.setString("clientId", c.getClientIdentifier().getString());
+				connectionTag.putString("client", c.getClientIdentifier().getUsername());
+				connectionTag.putString("clientId", c.getClientIdentifier().getString());
 				if(!c.getServerIdentifier().equals(IdentifierHandler.nullIdentifier))
-					connectionTag.setString("server", c.getServerIdentifier().getUsername());
-				connectionTag.setBoolean("isMain", c.isMain);
-				connectionTag.setBoolean("isActive", c.isActive);
+					connectionTag.putString("server", c.getServerIdentifier().getUsername());
+				connectionTag.putBoolean("isMain", c.isMain);
+				connectionTag.putBoolean("isActive", c.isActive);
 				if(c.isMain)
 				{
-					if(c.enteredGame)
-						connectionTag.setString("clientDim", c.clientHomeLand.getRegistryName().toString());
-					if(c.enteredGame )//&& DimensionManager.isDimensionRegistered(c.clientHomeLand)) TODO
+					if(c.clientHomeLand != null)
 					{
-						LandAspects aspects = MinestuckDimensionHandler.getAspects(c.clientHomeLand);
+						connectionTag.putString("clientDim", c.clientHomeLand.getRegistryName().toString());
+						LandAspects aspects = MinestuckDimensionHandler.getAspects(server, c.clientHomeLand);
 						IChunkGenerator chunkGen = server.getWorld(c.clientHomeLand).getDimension().createChunkGenerator();
 						if(chunkGen instanceof ChunkProviderLands)
 						{
 							ChunkProviderLands landChunkGen = (ChunkProviderLands) chunkGen;
 							if(landChunkGen.nameOrder)
 							{
-								connectionTag.setString("aspect1", aspects.aspectTerrain.getNames()[landChunkGen.nameIndex1]);
-								connectionTag.setString("aspect2", aspects.aspectTitle.getNames()[landChunkGen.nameIndex2]);
+								connectionTag.putString("aspect1", aspects.aspectTerrain.getNames()[landChunkGen.nameIndex1]);
+								connectionTag.putString("aspect2", aspects.aspectTitle.getNames()[landChunkGen.nameIndex2]);
 							} else
 							{
-								connectionTag.setString("aspect1", aspects.aspectTitle.getNames()[landChunkGen.nameIndex2]);
-								connectionTag.setString("aspect2", aspects.aspectTerrain.getNames()[landChunkGen.nameIndex1]);
+								connectionTag.putString("aspect1", aspects.aspectTitle.getNames()[landChunkGen.nameIndex2]);
+								connectionTag.putString("aspect2", aspects.aspectTerrain.getNames()[landChunkGen.nameIndex1]);
 							}
 						}
-						Title title = MinestuckPlayerData.getTitle(c.getClientIdentifier());
-						connectionTag.setByte("class", title == null ? -1 : (byte) title.getHeroClass().ordinal());
-						connectionTag.setByte("aspect", title == null ? -1 : (byte) title.getHeroAspect().ordinal());
+						Title title = PlayerSavedData.get(server.getWorld(DimensionType.OVERWORLD)).getTitle(c.getClientIdentifier());
+						connectionTag.putByte("class", title == null ? -1 : (byte) title.getHeroClass().ordinal());
+						connectionTag.putByte("aspect", title == null ? -1 : (byte) title.getHeroAspect().ordinal());
 					} else if(session.predefinedPlayers.containsKey(c.getClientIdentifier()))
 					{
 						PredefineData data = session.predefinedPlayers.get(c.getClientIdentifier());
 						
 						if(data.title != null)
 						{
-							connectionTag.setByte("class", (byte) data.title.getHeroClass().ordinal());
-							connectionTag.setByte("aspect", (byte) data.title.getHeroAspect().ordinal());
+							connectionTag.putByte("class", (byte) data.title.getHeroClass().ordinal());
+							connectionTag.putByte("aspect", (byte) data.title.getHeroAspect().ordinal());
 						}
 						
 						if(data.landTerrain != null)
-							connectionTag.setString("aspectTerrain", data.landTerrain.getPrimaryName());
+							connectionTag.putString("aspectTerrain", data.landTerrain.getPrimaryName());
 						if(data.landTitle != null)
-							connectionTag.setString("aspectTitle", data.landTitle.getPrimaryName());
+							connectionTag.putString("aspectTitle", data.landTitle.getPrimaryName());
 					}
 				}
 				connectionList.add(connectionTag);
@@ -654,32 +645,32 @@ public class SessionHandler
 				
 				NBTTagCompound connectionTag = new NBTTagCompound();
 				
-				connectionTag.setString("client", entry.getKey().getUsername());
-				connectionTag.setString("clientId", entry.getKey().getString());
-				connectionTag.setBoolean("isMain", true);
-				connectionTag.setBoolean("isActive", false);
-				connectionTag.setInt("clientDim", 0);
+				connectionTag.putString("client", entry.getKey().getUsername());
+				connectionTag.putString("clientId", entry.getKey().getString());
+				connectionTag.putBoolean("isMain", true);
+				connectionTag.putBoolean("isActive", false);
+				connectionTag.putInt("clientDim", 0);
 				
 				PredefineData data = entry.getValue();
 				
 				if(data.title != null)
 				{
-					connectionTag.setByte("class", (byte) data.title.getHeroClass().ordinal());
-					connectionTag.setByte("aspect", (byte) data.title.getHeroAspect().ordinal());
+					connectionTag.putByte("class", (byte) data.title.getHeroClass().ordinal());
+					connectionTag.putByte("aspect", (byte) data.title.getHeroAspect().ordinal());
 				}
 				
 				if(data.landTerrain != null)
-					connectionTag.setString("aspectTerrain", data.landTerrain.getPrimaryName());
+					connectionTag.putString("aspectTerrain", data.landTerrain.getPrimaryName());
 				if(data.landTitle != null)
-					connectionTag.setString("aspectTitle", data.landTitle.getPrimaryName());
+					connectionTag.putString("aspectTitle", data.landTitle.getPrimaryName());
 				
 				connectionList.add(connectionTag);
 			}
 			
 			NBTTagCompound sessionTag = new NBTTagCompound();
 			if(session.name != null)
-				sessionTag.setString("name", session.name);
-			sessionTag.setTag("connections", connectionList);
+				sessionTag.putString("name", session.name);
+			sessionTag.put("connections", connectionList);
 			sessionList.add(sessionTag);
 		}
 		return nbt;

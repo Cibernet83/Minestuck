@@ -23,7 +23,6 @@ import com.mraof.minestuck.tracker.MinestuckPlayerTracker;
 import com.mraof.minestuck.util.*;
 import com.mraof.minestuck.world.GateHandler;
 import com.mraof.minestuck.world.MinestuckDimensionHandler;
-import com.mraof.minestuck.world.lands.LandAspectRegistry;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -46,8 +45,9 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.dimension.DimensionType;
+import net.minecraftforge.common.util.ITeleporter;
 
-public abstract class ItemCruxiteArtifact extends Item implements Teleport.ITeleporter
+public abstract class ItemCruxiteArtifact extends Item implements ITeleporter
 {
 	private int xDiff;
 	private int yDiff;
@@ -71,10 +71,11 @@ public abstract class ItemCruxiteArtifact extends Item implements Teleport.ITele
 				if(!SburbHandler.shouldEnterNow(player))
 					return;
 				
-				SburbConnection c = SkaianetHandler.get(player.world).getMainConnection(IdentifierHandler.encode(player), true);
+				IdentifierHandler.PlayerIdentifier identifier = IdentifierHandler.encode(player);
+				SburbConnection c = SkaianetHandler.get(player.world).getMainConnection(identifier, true);
 				
-				//Only preforms Entry if you have no connection, haven't Entered, or you're not in a Land and additional Entries are permitted.
-				if(c == null || !c.enteredGame() || !MinestuckConfig.stopSecondEntry && !MinestuckDimensionHandler.isLandDimension(player.world.getDimension().getType()))
+				//Only performs Entry if you have no connection, haven't Entered, or you're not in a Land and additional Entries are permitted.
+				if(c == null || !c.hasEntered() || !MinestuckConfig.stopSecondEntry && !MinestuckDimensionHandler.isLandDimension(player.world.getDimension().getType()))
 				{
 					if(!canModifyEntryBlocks(player.world, player))
 					{
@@ -82,7 +83,7 @@ public abstract class ItemCruxiteArtifact extends Item implements Teleport.ITele
 						return;
 					}
 					
-					if(c != null && c.enteredGame())
+					if(c != null && c.hasEntered())
 					{
 						World newWorld = player.getServer().getWorld(c.getClientDimension());
 						if(newWorld == null)
@@ -100,24 +101,24 @@ public abstract class ItemCruxiteArtifact extends Item implements Teleport.ITele
 					//Teleportation code is now called from enterMedium(), which is called from createLand.
 					//createLand will return -1 if Entry fails for any reason, including the teleporter being null or returning false in prepareDestination().
 					//Whatever the problem is, relevant information should be printed to the console.
-					if(LandAspectRegistry.createLand(player, this) == null)
+					DimensionType landDimension = SkaianetHandler.get(player.world).prepareEntry(identifier);
+					if(landDimension == null)
 					{
-						player.sendMessage(new TextComponentString("Something went wrong creating your Land. More details in the server console."));
+						player.sendMessage(new TextComponentString("Something went wrong while creating your Land. More details in the server console."));
 					}
 					else
 					{
-						c = SburbHandler.getConnectionForDimension(player.getServer(), player.dimension);
-						if(c != null && c.getClientIdentifier().equals(IdentifierHandler.encode(player)))
+						if(this.prepareDestination(player.getPosition(), player, (WorldServer) player.world))
 						{
-							MinestuckCriteriaTriggers.CRUXITE_ARTIFACT.trigger((EntityPlayerMP) player);
-							MinestuckPlayerTracker.sendLandEntryMessage(player);
-						} else
-						{
-							player.sendMessage(new TextComponentString("Entry failed!"));
+							if(player.changeDimension(landDimension, this) != null)
+							{
+								SkaianetHandler.get(player.world).onEntry(identifier);
+							} else
+							{
+								player.sendMessage(new TextComponentString("Entry failed!"));
+							}
 						}
 					}
-					
-					return;
 				}
 			}
 		} catch(Exception e)
@@ -128,14 +129,15 @@ public abstract class ItemCruxiteArtifact extends Item implements Teleport.ITele
 	}
 	
 	@Override
-	public boolean prepareDestination(BlockPos origin, Entity player, WorldServer worldserver0)
+	public void placeEntity(World world, Entity entity, float yaw)
 	{
-		if(!(player instanceof EntityPlayerMP))
-		{
-			return false;
-		}
+		finalizeDestination(entity, (WorldServer) entity.world, (WorldServer) world);
+	}
+	
+	public boolean prepareDestination(BlockPos origin, EntityPlayerMP player, WorldServer worldserver0)
+	{
 		
-		blockMoves = new HashSet<BlockMove>();
+		blockMoves = new HashSet<>();
 		
 		Debug.infof("Starting entry for player %s", player.getName());
 		int x = origin.getX();
@@ -143,8 +145,8 @@ public abstract class ItemCruxiteArtifact extends Item implements Teleport.ITele
 		int z = origin.getZ();
 		this.origin = origin;
 		
-		creative = ((EntityPlayerMP) player).interactionManager.isCreative();
-		SburbConnection conn = SkaianetHandler.get(worldserver0).getMainConnection(IdentifierHandler.encode((EntityPlayer) player), true);
+		creative = player.interactionManager.isCreative();
+		SburbConnection conn = SkaianetHandler.get(worldserver0).getMainConnection(IdentifierHandler.encode(player), true);
 		
 		topY = MinestuckConfig.adaptEntryBlockHeight ? getTopHeight(worldserver0, x, y, z) : y + artifactRange;
 		yDiff = 127 - topY;
@@ -181,13 +183,13 @@ public abstract class ItemCruxiteArtifact extends Item implements Teleport.ITele
 					}
 					else if(!creative && (gotBlock == Blocks.COMMAND_BLOCK || gotBlock == Blocks.CHAIN_COMMAND_BLOCK || gotBlock == Blocks.REPEATING_COMMAND_BLOCK))
 					{
-						((EntityPlayerMP) player).sendStatusMessage(new TextComponentString("You are not allowed to move command blocks."), false);
+						player.sendStatusMessage(new TextComponentString("You are not allowed to move command blocks."), false);
 						return false;
 					} else if(te instanceof TileEntityComputer)		//If the block is a computer
 					{
 						if(!((TileEntityComputer)te).owner.equals(IdentifierHandler.encode((EntityPlayer) player)))	//You can't Enter with someone else's computer
 						{
-							((EntityPlayerMP) player).sendStatusMessage(new TextComponentString("You are not allowed to move other players' computers."), false);
+							player.sendStatusMessage(new TextComponentString("You are not allowed to move other players' computers."), false);
 							return false;
 						}
 						
@@ -209,14 +211,13 @@ public abstract class ItemCruxiteArtifact extends Item implements Teleport.ITele
 		
 		if(foundComputer == false && MinestuckConfig.needComputer)
 		{
-			((EntityPlayerMP) player).sendStatusMessage(new TextComponentString("There is no computer in range."), false);
+			player.sendStatusMessage(new TextComponentString("There is no computer in range."), false);
 			return false;
 		}
 		
 		return true;
 	}
 	
-	@Override
 	public void finalizeDestination(Entity player, WorldServer worldserver0, WorldServer worldserver1)
 	{
 		if(player instanceof EntityPlayerMP)
@@ -228,7 +229,7 @@ public abstract class ItemCruxiteArtifact extends Item implements Teleport.ITele
 			Debug.debug("Loading spawn chunks...");
 			for(int chunkX = ((x + xDiff - artifactRange) >> 4) - 1; chunkX <= ((x + xDiff + artifactRange) >> 4) + 2; chunkX++)		//Prevent anything generating on the piece that we move
 				for(int chunkZ = ((z + zDiff - artifactRange) >> 4) - 1; chunkZ <= ((z + zDiff + artifactRange) >> 4) + 2; chunkZ++)	//from the overworld.
-					worldserver1.getChunkProvider().provideChunk(chunkX, chunkZ, true, true);
+					worldserver1.getChunkProvider().getChunk(chunkX, chunkZ, true, true);
 			
 			//This is split into two sections because moves that require block updates should happen after the ones that don't.
 			//This helps to ensure that "anchored" blocks like torches still have the blocks they are anchored to when they update.
@@ -277,7 +278,7 @@ public abstract class ItemCruxiteArtifact extends Item implements Teleport.ITele
 						{
 							NBTTagCompound nbttagcompound = new NBTTagCompound();
 							e.writeWithoutTypeId(nbttagcompound);
-							nbttagcompound.removeTag("Dimension");
+							nbttagcompound.remove("Dimension");
 							newEntity.read(nbttagcompound);
 							newEntity.dimension = worldserver1.getDimension().getType();
 							newEntity.setPosition(newEntity.posX + xDiff, newEntity.posY + yDiff, newEntity.posZ + zDiff);
@@ -501,9 +502,9 @@ public abstract class ItemCruxiteArtifact extends Item implements Teleport.ITele
 			{
 				NBTTagCompound nbt = new NBTTagCompound();
 				tileEntity.write(nbt);
-				nbt.setInt("x", dest.getX());
-				nbt.setInt("y", dest.getY());
-				nbt.setInt("z", dest.getZ());
+				nbt.putInt("x", dest.getX());
+				nbt.putInt("y", dest.getY());
+				nbt.putInt("z", dest.getZ());
 				TileEntity te1 = TileEntity.create(nbt);
 				if(te1 != null)
 					chunkTo.addTileEntity(dest, te1);
