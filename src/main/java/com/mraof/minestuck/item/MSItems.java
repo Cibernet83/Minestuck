@@ -1,6 +1,7 @@
 package com.mraof.minestuck.item;
 
 import com.mraof.minestuck.Minestuck;
+import com.mraof.minestuck.block.CeramicPorkhollowBlock;
 import com.mraof.minestuck.block.MSBlocks;
 import com.mraof.minestuck.entity.item.CrewPosterEntity;
 import com.mraof.minestuck.entity.item.MetalBoatEntity;
@@ -475,6 +476,7 @@ public class MSItems
 		registerItemBlock(registry, CHESSBOARD, MSItemGroup.MAIN);
 		registerItemBlock(registry, MINI_FROG_STATUE, MSItemGroup.MAIN);
 		registerItemBlock(registry, GLOWYSTONE_DUST, MSItemGroup.MAIN);
+		registerItemBlock(registry, new CeramicPorkhollowItem(CERAMIC_PORKHOLLOW, new Item.Properties().group(MSItemGroup.MAIN)));
 		
 		//hammers
 		registry.register(new WeaponItem(ItemTier.IRON, 2, -2.4F, 1.0F, MSItemTypes.HAMMER_TOOL, new Item.Properties().defaultMaxDamage(131).group(MSItemGroup.WEAPONS)).setRegistryName("claw_hammer"));

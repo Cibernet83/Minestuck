@@ -24,7 +24,7 @@ public class ColorHandler
         ItemColors itemColors = event.getItemColors();
     
         itemColors.register((stack, tintIndex) -> BlockColorCruxite.handleColorTint(com.mraof.minestuck.util.ColorHandler.getColorFromStack(stack), tintIndex),
-                MSBlocks.CRUXITE_DOWEL, MSItems.CRUXITE_APPLE, MSItems.CRUXITE_POTION);
+                MSBlocks.CRUXITE_DOWEL, MSItems.CRUXITE_APPLE, MSItems.CRUXITE_POTION, MSBlocks.CERAMIC_PORKHOLLOW);
         itemColors.register(new FrogItemColor(), MSItems.FROG);
     }
     
@@ -32,7 +32,7 @@ public class ColorHandler
     public static void initBlockColors(ColorHandlerEvent.Block event)
     {
         BlockColors colors = event.getBlockColors();
-        colors.register(new BlockColorCruxite(), MSBlocks.ALCHEMITER.TOTEM_PAD.get(), MSBlocks.TOTEM_LATHE.DOWEL_ROD.get(), MSBlocks.CRUXITE_DOWEL);
+        colors.register(new BlockColorCruxite(), MSBlocks.ALCHEMITER.TOTEM_PAD.get(), MSBlocks.TOTEM_LATHE.DOWEL_ROD.get(), MSBlocks.CRUXITE_DOWEL, MSBlocks.CERAMIC_PORKHOLLOW);
         colors.register((state, worldIn, pos, tintIndex) ->
         {
             int age = state.get(StemBlock.AGE);

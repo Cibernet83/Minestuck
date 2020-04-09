@@ -1,0 +1,8 @@
+{
+    "variants": {
+        "facing=north": { "model": "minestuck:block/ceramic_porkhollow" },
+        "facing=east":  { "model": "minestuck:block/ceramic_porkhollow", "y": 90 },
+        "facing=south": { "model": "minestuck:block/ceramic_porkhollow", "y": 180 },
+        "facing=west":  { "model": "minestuck:block/ceramic_porkhollow", "y": 270 }
+    }
+}
