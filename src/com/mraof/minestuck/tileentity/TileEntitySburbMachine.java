@@ -5,6 +5,8 @@ import com.mraof.minestuck.alchemy.*;
 import com.mraof.minestuck.block.BlockSburbMachine;
 import com.mraof.minestuck.block.BlockSburbMachine.MachineType;
 import com.mraof.minestuck.block.MinestuckBlocks;
+import com.mraof.minestuck.event.AlchemizeItemEvent;
+import com.mraof.minestuck.event.AlchemizeItemMinichemiterEvent;
 import com.mraof.minestuck.item.MinestuckItems;
 import com.mraof.minestuck.tracker.MinestuckPlayerTracker;
 import com.mraof.minestuck.util.*;
@@ -17,6 +19,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 
 public class TileEntitySburbMachine extends TileEntityMachine
 {
@@ -355,6 +358,13 @@ public class TileEntitySburbMachine extends TileEntityMachine
 				if (newItem.isEmpty())
 					newItem = new ItemStack(MinestuckBlocks.genericObject);
 
+				GristSet cost = GristRegistry.getGristConversion(newItem);
+
+				AlchemizeItemEvent alchemizeItemEvent = new AlchemizeItemMinichemiterEvent(world, inv.get(0), newItem, this);
+				if (MinecraftForge.EVENT_BUS.post(alchemizeItemEvent))
+					break;
+				newItem = alchemizeItemEvent.getResultItem();
+
 				if (inv.get(1).isEmpty())
 				{
 					setInventorySlotContents(1, newItem);
@@ -366,9 +376,8 @@ public class TileEntitySburbMachine extends TileEntityMachine
 
 				EntityPlayerMP player = owner.getPlayer();
 				if (player != null)
-					AlchemyRecipes.onAlchemizedItem(newItem, player);
+					AlchemyRecipes.giveAlchemyExperience(newItem, player);
 
-				GristSet cost = GristRegistry.getGristConversion(newItem);
 				if (newItem.getItem() == MinestuckItems.captchaCard)
 					cost = new GristSet(selectedGrist, MinestuckConfig.cardCost);
 				if (newItem.isItemDamaged())

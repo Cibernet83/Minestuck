@@ -1,8 +1,6 @@
 package com.mraof.minestuck.tileentity;
 
 
-import java.util.Arrays;
-
 import com.mraof.minestuck.Minestuck;
 import com.mraof.minestuck.MinestuckConfig;
 import com.mraof.minestuck.alchemy.*;
@@ -10,6 +8,8 @@ import com.mraof.minestuck.block.BlockAlchemiter;
 import com.mraof.minestuck.block.BlockAlchemiter.EnumParts;
 import com.mraof.minestuck.client.gui.GuiHandler;
 import com.mraof.minestuck.block.MinestuckBlocks;
+import com.mraof.minestuck.event.AlchemizeItemAlchemiterEvent;
+import com.mraof.minestuck.event.AlchemizeItemEvent;
 import com.mraof.minestuck.item.MinestuckItems;
 import com.mraof.minestuck.tracker.MinestuckPlayerTracker;
 import com.mraof.minestuck.util.*;
@@ -18,7 +18,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryHelper;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -28,6 +27,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 
 public class TileEntityAlchemiter extends TileEntity
 {
@@ -388,7 +388,7 @@ public class TileEntityAlchemiter extends TileEntity
 		ItemStack newItem = getOutput();
 		//Clamp quantity
 		quantity = Math.min(newItem.getMaxStackSize() * MinestuckConfig.alchemiterMaxStacks, Math.max(1, quantity));
-		
+
 		EnumFacing facing = world.getBlockState(pos).getValue(BlockAlchemiter.DIRECTION);
 		//get the position to spawn the item
 		BlockPos spawnPos = this.getPos().offset(facing).offset(facing.rotateY());
@@ -401,12 +401,15 @@ public class TileEntityAlchemiter extends TileEntity
 			newItem.setItemDamage(0);
 		//get the grist cost
 		GristSet cost = getGristCost(quantity);
-		
+
 		boolean canAfford = GristHelper.canAfford(MinestuckPlayerData.getGristSet(player), cost);
+		AlchemizeItemEvent alchemizeItemEvent = new AlchemizeItemAlchemiterEvent(world, dowel, newItem, this, spawnPos);
 		
-		if(canAfford)
+		if(canAfford && !MinecraftForge.EVENT_BUS.post(alchemizeItemEvent))
 		{
-			while(quantity > 0)
+			newItem = alchemizeItemEvent.getResultItem();
+
+			while(quantity > 0 && !newItem.isEmpty())
 			{
 				ItemStack stack = newItem.copy();
 				//TODO
@@ -424,7 +427,7 @@ public class TileEntityAlchemiter extends TileEntity
 				world.spawnEntity(item);
 			}
 			
-			AlchemyRecipes.onAlchemizedItem(newItem, player);
+			AlchemyRecipes.giveAlchemyExperience(newItem, player);
 			
 			PlayerIdentifier pid = IdentifierHandler.encode(player);
 			GristHelper.decrease(pid, cost);
