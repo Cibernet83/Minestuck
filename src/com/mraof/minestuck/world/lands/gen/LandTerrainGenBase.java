@@ -27,6 +27,7 @@ public abstract class LandTerrainGenBase implements ILandTerrainGen
 		IBlockState ground = provider.getGroundBlock();
 		IBlockState upper = provider.getUpperBlock();
 		IBlockState surface = provider.getSurfaceBlock();
+		IBlockState bedrock = provider.blockRegistry.getBlockState("bedrock");
 		IBlockState river = provider.blockRegistry.getBlockState("river");
 		IBlockState ocean = provider.blockRegistry.getBlockState("ocean");
 		
@@ -38,7 +39,7 @@ public abstract class LandTerrainGenBase implements ILandTerrainGen
 		for(int x = 0; x < 16; x++)
 			for(int z = 0; z < 16; z++)
 			{
-				primer.setBlockState(x, 0, z, Blocks.BEDROCK.getDefaultState());
+				primer.setBlockState(x, 0, z, bedrock);
 				int riverHeight = Math.max(0, topRiverBlock[x << 4 | z] - Math.max(0, seaHeight - topBlock[x << 4 | z]));
 				int y;
 				int yMax = topBlock[x << 4 | z] - 3 - riverHeight;

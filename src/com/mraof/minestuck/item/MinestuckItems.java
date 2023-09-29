@@ -171,8 +171,8 @@ public class MinestuckItems
 	//public static Item chessboard = new Item().setUnlocalizedName("chessboard").setCreativeTab(TabMinestuck.instance);
 	public static ItemDowel cruxiteDowel = new ItemDowel(MinestuckBlocks.blockCruxiteDowel);
 	public static Item captchaCard = new ItemCaptchaCard();
-	public static Item cruxiteApple = new ItemCruxiteApple();
-	public static Item cruxitePotion = new ItemCruxitePotion();
+	public static Item cruxiteApple = new ItemCruxiteFood(EnumAction.EAT);
+	public static Item cruxitePotion = new ItemCruxiteFood(EnumAction.DRINK);
 	public static Item disk = new ItemDisk();
 	public static Item grimoire = new ItemGrimoire().setUnlocalizedName("grimoire");
 	public static Item longForgottenWarhorn = new ItemLongForgottenWarhorn().setUnlocalizedName("longForgottenWarhorn");

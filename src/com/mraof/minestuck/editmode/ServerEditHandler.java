@@ -3,6 +3,7 @@ package com.mraof.minestuck.editmode;
 import com.mraof.minestuck.MinestuckConfig;
 import com.mraof.minestuck.alchemy.*;
 import com.mraof.minestuck.entity.EntityDecoy;
+import com.mraof.minestuck.event.GetDeployListEvent;
 import com.mraof.minestuck.network.MinestuckChannelHandler;
 import com.mraof.minestuck.network.MinestuckPacket;
 import com.mraof.minestuck.network.MinestuckPacket.Type;
@@ -28,6 +29,7 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
@@ -37,6 +39,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
@@ -115,7 +118,10 @@ public class ServerEditHandler
 		data.connection.posZ = player.posZ;
 		
 		player.setGameType(decoy.gameType);
-		
+
+		for(PotionEffect effect : decoy.getActivePotionEffects())
+			player.addPotionEffect(effect);
+
 		player.connection.setPlayerLocation(decoy.posX, decoy.posY, decoy.posZ, decoy.rotationYaw, decoy.rotationPitch);
 		player.capabilities.readCapabilitiesFromNBT(decoy.capabilities);
 		player.sendPlayerAbilities();
@@ -132,12 +138,15 @@ public class ServerEditHandler
 		
 		if(damageSource != null && damageSource.getImmediateSource() != player)
 			player.attackEntityFrom(damageSource, damage);
+
+		if(decoy.isRiding())
+			player.startRiding(decoy.getRidingEntity());
+		for(Entity p : decoy.getPassengers())
+			p.startRiding(player);
 	}
 	
 	public static void newServerEditor(EntityPlayerMP player, PlayerIdentifier computerOwner, PlayerIdentifier computerTarget)
 	{
-		if(player.isRiding())
-			return;	//Don't want to bother making the decoy able to ride anything right now.
 		SburbConnection c = SkaianetHandler.getClientConnection(computerTarget);
 		if(c != null && c.getServerIdentifier().equals(computerOwner) && getData(c) == null && getData(player) == null)
 		{
@@ -187,9 +196,11 @@ public class ServerEditHandler
 		
 		player.closeScreen();
 		player.inventory.clear();
+		player.clearActivePotions();
 		
 		player.setGameType(GameType.CREATIVE);
 		player.sendPlayerAbilities();
+		player.dismountRidingEntity();
 		
 		return true;
 	}
@@ -226,7 +237,10 @@ public class ServerEditHandler
 		EditData data = getData(player);
 		if(data == null)
 			return;
-		
+
+		if(!player.getActivePotionEffects().isEmpty())
+			player.clearActivePotions();
+
 		SburbConnection c = data.connection;
 		int range = MinestuckDimensionHandler.isLandDimension(player.dimension) ? MinestuckConfig.landEditRange : MinestuckConfig.overworldEditRange;
 		
@@ -468,7 +482,9 @@ public class ServerEditHandler
 		deployList.removeIf(entry -> givenItems[DeployList.getOrdinal(entry.getName())] && entry.getSecondaryGristCost(connection) == null);
 		List<ItemStack> itemList = new ArrayList<>();
 		deployList.forEach(deployEntry -> itemList.add(deployEntry.getItemStack(connection)));
-		
+
+		MinecraftForge.EVENT_BUS.post(new GetDeployListEvent(player, connection, itemList));
+
 		boolean inventoryChanged = false;
 		for(int i = 0; i < player.inventory.mainInventory.size(); i++)
 		{

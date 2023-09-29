@@ -69,7 +69,7 @@ public class PartGroup
         float yaw = -parent.renderYawOffset * 3.141592f / 180f;
         if(parts.size() != positions.size())
         {
-            System.out.println("Size mismatch: " + parts.size() + " parts, " + positions.size() + " positions (remote: " + parent.world.isRemote + ")");
+            //System.out.println("Size mismatch: " + parts.size() + " parts, " + positions.size() + " positions (remote: " + parent.world.isRemote + ")");
         }
         for(int i = 0; i < parts.size(); i++)
         {

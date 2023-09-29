@@ -136,8 +136,6 @@ public class ItemFrog extends Item
         ItemStack itemstack = player.getHeldItem(hand);
         int dmg = itemstack.getMetadata();
         
-        System.out.println("dmg: " + dmg);
-        
         if (worldIn.isRemote)
         {
             return EnumActionResult.SUCCESS;

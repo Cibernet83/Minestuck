@@ -27,7 +27,11 @@ import com.mraof.minestuck.entity.underling.EntityImp;
 import com.mraof.minestuck.entity.underling.EntityLich;
 import com.mraof.minestuck.entity.underling.EntityOgre;
 import com.mraof.minestuck.entity.underling.EntityUnderling;
-import com.mraof.minestuck.item.ItemCruxiteArtifact;
+import com.mraof.minestuck.event.GenerateLandTerrainEvent;
+import com.mraof.minestuck.event.GenerateLandTitleEvent;
+import com.mraof.minestuck.item.CruxiteArtifactTeleporter;
+import com.mraof.minestuck.item.ICruxiteArtifact;
+import com.mraof.minestuck.item.ItemCruxiteFood;
 import com.mraof.minestuck.item.MinestuckItems;
 import com.mraof.minestuck.network.MinestuckChannelHandler;
 import com.mraof.minestuck.network.MinestuckPacket;
@@ -66,6 +70,7 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome.SpawnListEntry;
+import net.minecraftforge.common.MinecraftForge;
 
 /**
  * A class for managing sbrub-related stuff from outside this package that is dependent on connections and sessions.
@@ -515,7 +520,13 @@ public class SburbHandler
 		
 		session.locked = true;
 	}
-	
+
+	public static final List<ICruxiteArtifact> CRUXITE_ARTIFACTS = new ArrayList<ICruxiteArtifact>()
+	{{
+		add((ICruxiteArtifact) MinestuckItems.cruxiteApple);
+		add((ICruxiteArtifact) MinestuckItems.cruxitePotion);
+	}};
+
 	/**
 	 * @param player The username of the player, encoded.
 	 * @return Damage value for the entry item
@@ -524,17 +535,8 @@ public class SburbHandler
 	{
 		SburbConnection c = SkaianetHandler.getClientConnection(player); 
 		int colorIndex = MinestuckPlayerData.getData(player).color;
-		Item artifact;
-		if(c == null)
-			artifact = MinestuckItems.cruxiteApple;
-		
-		else switch(c.artifactType)
-		{
-		case 1: artifact = MinestuckItems.cruxitePotion; break;
-		default: artifact = MinestuckItems.cruxiteApple;
-		}
-		
-		return new ItemStack(artifact, 1, colorIndex + 1);
+
+		return CRUXITE_ARTIFACTS.get(c == null || c.artifactType >= CRUXITE_ARTIFACTS.size() || c.artifactType < 0 ? 0 : c.artifactType).getStack(colorIndex).copy();
 	}
 	
 	public static GristType getPrimaryGristType(PlayerIdentifier player)
@@ -620,11 +622,25 @@ public class SburbHandler
 					frogs = true;
 			}
 		}
-		
+
 		if(titleAspect == null)
+		{
+			GenerateLandTitleEvent landTitleEvent = new GenerateLandTitleEvent(connection);
+			if (!MinecraftForge.EVENT_BUS.post(landTitleEvent))
+				titleAspect = landTitleEvent.getLandTitle();
+		}
+		if (titleAspect == null)
 			titleAspect = aspectGen.getTitleAspect(terrainAspect, title.getHeroAspect(), usedTitleAspects);
+
+		if(terrainAspect == null)
+		{
+			GenerateLandTerrainEvent landTerrainEvent = new GenerateLandTerrainEvent(connection);
+			if (!MinecraftForge.EVENT_BUS.post(landTerrainEvent))
+				terrainAspect = landTerrainEvent.getLandTerrain();
+		}
 		if(terrainAspect == null)
 			terrainAspect = aspectGen.getTerrainAspect(titleAspect, usedTerrainAspects);
+
 		MinestuckDimensionHandler.registerLandDimension(connection.clientHomeLand, new AspectCombination(terrainAspect, titleAspect));
 	}
 	
@@ -798,7 +814,7 @@ public class SburbHandler
 			Vec3d pos = titleSelectionMap.remove(player);
 			
 			player.setPosition(pos.x, pos.y, pos.z);
-			((ItemCruxiteArtifact) MinestuckItems.cruxiteApple).onArtifactActivated(player);
+			((ItemCruxiteFood) MinestuckItems.cruxiteApple).getTeleporter().onArtifactActivated(player);
 			
 		} else Debug.warnf("%s tried to select a title without entering.", player.getName());
 	}

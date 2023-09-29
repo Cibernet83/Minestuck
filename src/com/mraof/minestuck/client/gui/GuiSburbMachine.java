@@ -215,6 +215,6 @@ public class GuiSburbMachine extends GuiMachine
 	 */
 	public int getScaledValue(int progress, int max, int imageMax)
 	{
-		return (int) ((float) imageMax * ((float) progress / (float) max));
+		return Math.round((float) imageMax * ((float) progress / (float) max));
 	}
 }

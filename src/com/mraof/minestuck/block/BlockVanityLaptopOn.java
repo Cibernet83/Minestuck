@@ -100,7 +100,6 @@ public class BlockVanityLaptopOn extends BlockComputerOff implements ITileEntity
 				worldIn.setBlockState(pos, state.withProperty(BSOD, true), 2);
 				tileEntity.installedPrograms.put(id, true);
 				tileEntity.markBlockForUpdate();
-				System.out.println("A laptop has been BSOD'd!");
 			}
 			else tileEntity.installedPrograms.put(id, true);
 			tileEntity.markDirty();

@@ -14,7 +14,7 @@ public class LandAspectNull extends TitleLandAspect
 	@Override
 	public String[] getNames()
 	{
-		return new String[] {"Null"};
+		return new String[] {"null"};
 	}
 	
 }

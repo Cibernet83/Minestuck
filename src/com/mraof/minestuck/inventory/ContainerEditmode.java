@@ -2,6 +2,7 @@ package com.mraof.minestuck.inventory;
 
 import com.mraof.minestuck.editmode.DeployList;
 import com.mraof.minestuck.editmode.ServerEditHandler;
+import com.mraof.minestuck.event.GetDeployListEvent;
 import com.mraof.minestuck.network.MinestuckChannelHandler;
 import com.mraof.minestuck.network.MinestuckPacket;
 import com.mraof.minestuck.network.MinestuckPacket.Type;
@@ -15,6 +16,7 @@ import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.common.MinecraftForge;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,7 +105,10 @@ public class ContainerEditmode extends Container
 			itemList.add(i >= tools.size() ? ItemStack.EMPTY : tools.get(i));
 			itemList.add(i >= deployItems.size() ? ItemStack.EMPTY : deployItems.get(i).getItemStack(c));
 		}
-		
+
+
+		MinecraftForge.EVENT_BUS.post(new GetDeployListEvent(player, c, itemList));
+
 		boolean changed = false;
 		if(itemList.size() != this.items.size())
 			changed = true;

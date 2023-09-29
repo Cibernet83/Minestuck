@@ -49,8 +49,8 @@ public class ComponentCastleRoomPiece extends ComponentCastlePiece
 		default:
 			piece = findValidPlacement(par0List, startPiece, x, y, z, par5, par6);
 		}
-		if(piece == null)
-			System.out.printf("%d %d %d %d, ", x, y, z, par6);
+		//if(piece == null)
+			//System.out.printf("%d %d %d %d, ", x, y, z, par6);
 		return piece;
 	}
 

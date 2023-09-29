@@ -86,29 +86,27 @@ public class ClientProxy extends CommonProxy
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityGate.class, new RenderGate());
 //		MinecraftForgeClient.registerItemRenderer(Minestuck.captchaCard, new RenderCard());
 		
+		mc.getItemColors().registerItemColorHandler((stack, tintIndex) -> BlockColorCruxite.handleColorTint(stack.getMetadata() == 0 ? 0x99D9EA : ColorCollector.getColor(stack.getMetadata() - 1), tintIndex),
+				MinestuckItems.cruxiteApple, MinestuckItems.cruxitePotion);
 		mc.getItemColors().registerItemColorHandler((stack, tintIndex) -> BlockColorCruxite.handleColorTint(stack.getMetadata() == 0 ? -1 : ColorCollector.getColor(stack.getMetadata() - 1), tintIndex),
-				MinestuckItems.cruxiteDowel, MinestuckItems.cruxiteApple, MinestuckItems.cruxitePotion);
+				MinestuckItems.cruxiteDowel);
 		mc.getBlockColors().registerBlockColorHandler(new BlockColorCruxite(), MinestuckBlocks.alchemiter[0], MinestuckBlocks.totemlathe[1], MinestuckBlocks.blockCruxiteDowel);
 
-		mc.getItemColors().registerItemColorHandler(new IItemColor()
-        {
-            public int colorMultiplier(ItemStack stack, int tintIndex)
-            {
-            	ItemFrog item = ((ItemFrog)stack.getItem());
-            	int color = -1;
-            	
-            	if((stack.getMetadata() > EntityFrog.maxTypes() || stack.getMetadata() < 1))
-            	{
-	            	switch(tintIndex)
-	            	{
-	            	case 0: color = item.getSkinColor(stack); break;
-	            	case 1: color = item.getEyeColor(stack); break;
-	            	case 2: color = item.getBellyColor(stack); break; 
-	            	}
-            	}
-                return color;
-            }
-        }, MinestuckItems.itemFrog);
+		mc.getItemColors().registerItemColorHandler((stack, tintIndex) -> {
+			ItemFrog item = ((ItemFrog)stack.getItem());
+			int color = -1;
+
+			if((stack.getMetadata() > EntityFrog.maxTypes() || stack.getMetadata() < 1))
+			{
+				switch(tintIndex)
+				{
+				case 0: color = item.getSkinColor(stack); break;
+				case 1: color = item.getEyeColor(stack); break;
+				case 2: color = item.getBellyColor(stack); break;
+				}
+			}
+		    return color;
+		}, MinestuckItems.itemFrog);
 	}
 	
 	@Override

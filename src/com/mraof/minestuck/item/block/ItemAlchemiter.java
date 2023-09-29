@@ -60,6 +60,10 @@ public class ItemAlchemiter extends ItemBlock
 				
 				IBlockState state = this.block.getDefaultState().withProperty(BlockAlchemiter.DIRECTION, placedFacing);
 				this.placeBlockAt(itemstack, player, worldIn, pos, facing, hitX, hitY, hitZ, state);
+
+				if(!player.isCreative())
+					itemstack.shrink(1);
+
 				return EnumActionResult.SUCCESS;
 			}
 			return EnumActionResult.FAIL;

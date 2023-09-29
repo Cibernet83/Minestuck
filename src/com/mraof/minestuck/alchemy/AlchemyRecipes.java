@@ -2,7 +2,8 @@ package com.mraof.minestuck.alchemy;
 
 import com.mraof.minestuck.block.BlockMinestuckStone;
 import com.mraof.minestuck.block.MinestuckBlocks;
-import com.mraof.minestuck.item.ItemCruxiteArtifact;
+import com.mraof.minestuck.item.CruxiteArtifactTeleporter;
+import com.mraof.minestuck.item.ICruxiteArtifact;
 import com.mraof.minestuck.item.MinestuckItems;
 import com.mraof.minestuck.modSupport.*;
 import com.mraof.minestuck.util.*;
@@ -19,7 +20,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
@@ -1130,7 +1130,7 @@ public class AlchemyRecipes
 	
 	public static void giveAlchemyExperience(ItemStack stack, EntityPlayer player)
 	{
-		if(!(stack.getItem() instanceof ItemCruxiteArtifact))
+		if(!(stack.getItem() instanceof ICruxiteArtifact))
 		{
 			Echeladder e = MinestuckPlayerData.getData(player).echeladder;
 			e.checkBonus(Echeladder.ALCHEMY_BONUS_OFFSET);

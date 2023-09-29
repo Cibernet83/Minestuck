@@ -70,6 +70,11 @@ public abstract class TerrainLandAspect implements ILandAspect<TerrainLandAspect
 	{
 		return 1/5F;//getOceanChance()/2 + 1/5F; For if generation by ocean
 	}
+
+	public boolean shouldGenerateMinestuckOres()
+	{
+		return true;
+	}
 	
 	@Override
 	public List<TerrainLandAspect> getVariations()

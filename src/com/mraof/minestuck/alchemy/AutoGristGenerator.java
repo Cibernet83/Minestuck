@@ -1,12 +1,9 @@
 package com.mraof.minestuck.alchemy;
 
-import com.mraof.minestuck.modSupport.Minegicka3Support;
 import com.mraof.minestuck.util.Debug;
 import net.minecraft.client.util.RecipeItemHelper;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.CraftingManager;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.item.crafting.*;
 
 import java.util.*;
 
@@ -25,7 +22,7 @@ public class AutoGristGenerator
 	{
 		recipeList = new HashMap<>();
 		
-		Debug.debug("Looking for dynamic grist conversions...");
+		Debug.debug("Looking for dynamic crafting grist conversions...");
 		for(IRecipe recipe : CraftingManager.REGISTRY)
 		{
 			try
@@ -46,18 +43,33 @@ public class AutoGristGenerator
 				Debug.logger.warn(String.format("A null pointer exception was thrown for %s. This was not expected. Stacktrace: ", recipe), e);
 			}
 		}
-		Debug.info("Found " + recipeList.size() + " nondynamic recipes.");
+		int craftingCount = recipeList.size();
+		Debug.info("Found " + craftingCount + " nondynamic crafting recipes.");
+
+		Debug.debug("Looking for dynamic smelting grist conversions...");
+		for (Map.Entry<ItemStack, ItemStack> entry : FurnaceRecipes.instance().getSmeltingList().entrySet())
+		{
+			ItemStack input = entry.getKey();
+			ItemStack output = entry.getValue();
+			if(output.isEmpty())
+				continue;
+			int param = RecipeItemHelper.pack(output);
+
+			if(!recipeList.containsKey(param))
+				recipeList.put(param, new ArrayList<>());
+			recipeList.get(param).add(new DummySmeltingRecipe(input, output));
+		}
+		int smeltingCount = recipeList.size() - craftingCount;
+		Debug.info("Found " + smeltingCount + " smelting recipes.");
 	}
 	
 	public void excecute()
 	{
 		Debug.debug("Calculating grist conversion...");
-		Iterator<Map.Entry<Integer, List<IRecipe>>> it = recipeList.entrySet().iterator();
-		while(it.hasNext())
+		for(Map.Entry<Integer, List<IRecipe>> entry : recipeList.entrySet())
 		{
-			Map.Entry<Integer, List<IRecipe>> pairs = it.next();
 			boolean b = false;
-			for(IRecipe recipe : pairs.getValue())
+			for(IRecipe recipe : entry.getValue())
 			{
 				lookedOver = new HashSet<>();
 				try
@@ -65,7 +77,7 @@ public class AutoGristGenerator
 					b = checkRecipe(recipe);
 				} catch(Exception e)
 				{
-					Debug.logger.warn(String.format("Failed to look over recipe \"%s\" for \"%s\". Cause:", recipe, RecipeItemHelper.unpack(pairs.getKey())), e);
+					Debug.logger.warn(String.format("Failed to look over recipe \"%s\" for \"%s\". Cause:", recipe, RecipeItemHelper.unpack(entry.getKey())), e);
 				}
 				if(b)
 					break;
@@ -132,6 +144,8 @@ public class AutoGristGenerator
 			
 			set.addGrist(ingrCost);
 		}
+		if (recipe instanceof DummySmeltingRecipe)
+			set.addGrist(GristType.Tar, 1);
 		
 		set.scaleGrist(1/ (float) output.getCount());
 		GristRegistry.addGristConversion(output, output.getHasSubtypes(), set);

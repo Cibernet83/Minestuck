@@ -57,6 +57,10 @@ public class ItemPunchDesignix extends ItemBlock
 				
 				IBlockState state = this.block.getDefaultState().withProperty(BlockPunchDesignix.DIRECTION, placedFacing).withProperty(BlockPunchDesignix.PART, BlockPunchDesignix.EnumParts.BOTTOM_LEFT);
 				this.placeBlockAt(itemstack, player, worldIn, pos, facing, hitX, hitY, hitZ, state);
+
+				if(!player.isCreative())
+					itemstack.shrink(1);
+
 				return EnumActionResult.SUCCESS;
 			}
 			return EnumActionResult.FAIL;

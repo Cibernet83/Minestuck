@@ -167,9 +167,9 @@ public class MinestuckModelManager
 		ModelLoader.setCustomMeshDefinition(captchaCard, new CaptchaCardDefinition());
 		ModelLoader.registerItemVariants(shunt, new ResourceLocation("minestuck:shunt_empty"), new ResourceLocation("minestuck:shunt_full"));
 		ModelLoader.setCustomMeshDefinition(shunt, new ShuntDefinition());
-		ModelLoader.registerItemVariants(cruxiteApple, new ResourceLocation("minestuck:cruxite_apple"), new ResourceLocation("minestuck:cruxite_apple_blank"));
+		ModelLoader.registerItemVariants(cruxiteApple, new ResourceLocation("minestuck:cruxite_apple"));
 		ModelLoader.setCustomMeshDefinition(cruxiteApple, new ColoredItemDefinition("minestuck:cruxite_apple"));
-		ModelLoader.registerItemVariants(cruxitePotion, new ResourceLocation("minestuck:cruxite_potion"), new ResourceLocation("minestuck:cruxite_potion_blank"));
+		ModelLoader.registerItemVariants(cruxitePotion, new ResourceLocation("minestuck:cruxite_potion"));
 		ModelLoader.setCustomMeshDefinition(cruxitePotion, new ColoredItemDefinition("minestuck:cruxite_potion"));
 		register(disk, 0, "disk_client");
 		register(disk, 1, "disk_server");
@@ -500,9 +500,7 @@ public class MinestuckModelManager
 		@Override
 		public ModelResourceLocation getModelLocation(ItemStack stack)
 		{
-			if(stack.getMetadata() == 0)
-				return new ModelResourceLocation(name, "inventory");
-			else return new ModelResourceLocation(name + "_blank", "inventory");
+			return new ModelResourceLocation(name, "inventory");
 		}
 	}
 	

@@ -259,7 +259,7 @@ public class LandAspectRegistry
 	 * @param player The player whose Land is being created
 	 * @param teleport The teleporter in charge of carrying the player into the Land.
 	 * If this value is null, the Land will be created, and the player will be left behind.
-	 * <code>ItemCruxiteArtifact</code> is the recommended teleporter for Entry.
+	 * <code>CruxiteArtifactTeleporter</code> is the recommended teleporter for Entry.
 	 * @return Returns the dimension of the player's Land, or -1 if Entry fails.
 	 */
 	public static int createLand(EntityPlayer player, Teleport.ITeleporter teleport)

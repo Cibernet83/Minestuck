@@ -143,7 +143,20 @@ public class Echeladder
 
 	public void setProgress(int rung, double progress)
 	{
-		setByCommand(rung, progress);
+		this.rung = MathHelper.clamp(rung, 0, RUNG_COUNT - 1);	//Can never be too careful
+		if(rung != RUNG_COUNT - 1)
+		{
+			this.progress = (int) (getRungProgressReq()*progress);
+			if(this.progress >= getRungProgressReq())
+				this.progress--;
+		} else this.progress = 0;
+
+		EntityPlayer player = identifier.getPlayer();
+		if(player != null)
+		{
+			MinestuckPlayerTracker.updateEcheladder(player, true);
+			updateEcheladderBonuses(player);
+		}
 	}
 
 	public boolean isProgressEnabled()
@@ -240,23 +253,11 @@ public class Echeladder
 	{
 		return 50 * (int) Math.pow(2f, rung/3.5f);
 	}
-	
+
+	@Deprecated
 	public void setByCommand(int rung, double progress)
 	{
-		this.rung = MathHelper.clamp(rung, 0, RUNG_COUNT - 1);	//Can never be too careful
-		if(rung != RUNG_COUNT - 1)
-		{
-			this.progress = (int) (getRungProgressReq()*progress);
-			if(this.progress >= getRungProgressReq())
-				this.progress--;
-		} else this.progress = 0;
-		
-		EntityPlayer player = identifier.getPlayer();
-		if(player != null)
-		{
-			MinestuckPlayerTracker.updateEcheladder(player, true);
-			updateEcheladderBonuses(player);
-		}
+		setProgress(rung, progress);
 	}
 	
 }

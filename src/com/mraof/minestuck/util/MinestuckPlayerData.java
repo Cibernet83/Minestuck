@@ -147,7 +147,7 @@ public class MinestuckPlayerData
 	{
 		return addBoondollars(IdentifierHandler.encode(player), boons);
 	}
-	
+
 	public static boolean addBoondollars(PlayerIdentifier id, long boons)
 	{
 		PlayerData data = MinestuckPlayerData.getData(id);
