@@ -1,6 +1,17 @@
 {
-  "parent": "minestuck:item/large_weapon",
-  "textures": {
-    "layer0": "minestuck:item/telescopic_sassacrusher"
+  "loader": "neoforge:separate_transforms",
+  "gui_light": "front",
+  
+  "base": {
+    "parent": "minestuck:item/equipped/telescopic_sassacrusher"
+  },
+  
+  "perspectives": {
+    "gui": {
+      "parent": "item/generated",
+      "textures": {
+        "layer0": "minestuck:item/telescopic_sassacrusher"
+      }
+    }
   }
 }
